@@ -125,7 +125,7 @@ AUU
   fi
 
   # 7. ACME email + front proxy (nginx-proxy + acme-companion)
-  mkdir -p /opt/proxy/certs
+  mkdir -p /opt/proxy/certs; chmod 700 /opt/proxy/certs 2>/dev/null || true
   if [ ! -f "${WPF_ROOT}/proxy/.env" ]; then
     local acme_email; acme_email="$(ui_input "Email cho Let's Encrypt (cảnh báo cert hết hạn):" "")"
     printf 'ACME_EMAIL=%s\n' "$acme_email" > "${WPF_ROOT}/proxy/.env"

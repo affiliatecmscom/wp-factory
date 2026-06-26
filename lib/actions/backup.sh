@@ -10,15 +10,19 @@ _backup_one() {
   local domain; domain="$(site_get "$id" DOMAIN)"
   local out="${BACKUPS_ROOT}/${id}"
   mkdir -p "$out"
+  # Backup chứa .env (DB/Redis pass) + dump DB -> chỉ root đọc.
+  chmod 700 "$BACKUPS_ROOT" "$out" 2>/dev/null || true
   local stamp; stamp="$(date +%Y%m%d-%H%M%S)"
   local tmp="${dir}/db.sql"
 
   info "Backup ${domain} (${id})..."
-  docker exec "${id}_db" sh -c 'exec mariadb-dump --no-tablespaces -uwordpress -p"$MARIADB_PASSWORD" wordpress' > "$tmp" 2>/dev/null \
+  ( umask 077; docker exec "${id}_db" sh -c 'exec mariadb-dump --no-tablespaces -uwordpress -p"$MARIADB_PASSWORD" wordpress' > "$tmp" 2>/dev/null ) \
     || { warn "Dump DB lỗi cho ${id}."; rm -f "$tmp"; return 1; }
+  chmod 600 "$tmp" 2>/dev/null || true
 
   local file="${out}/${stamp}.tar.gz"
-  tar -C "$SITES_ROOT" -czf "$file" "$id" 2>/dev/null
+  ( umask 077; tar -C "$SITES_ROOT" -czf "$file" "$id" 2>/dev/null )
+  chmod 600 "$file" 2>/dev/null || true
   rm -f "$tmp"
 
   # xoay vòng

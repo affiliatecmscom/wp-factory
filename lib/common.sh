@@ -209,7 +209,7 @@ proxy_compose() {
 # Lưu Cloudflare Origin Certificate cho 1 domain (nginx-proxy dùng thay vì Let's Encrypt).
 ssl_save_origin() {
   local domain="$1" cert="$2" key="$3"
-  mkdir -p "$PROXY_CERTS"
+  mkdir -p "$PROXY_CERTS"; chmod 700 "$PROXY_CERTS" 2>/dev/null || true
   printf '%s\n' "$cert" > "${PROXY_CERTS}/${domain}.crt"
   printf '%s\n' "$key"  > "${PROXY_CERTS}/${domain}.key"
   chmod 600 "${PROXY_CERTS}/${domain}.crt" "${PROXY_CERTS}/${domain}.key"
