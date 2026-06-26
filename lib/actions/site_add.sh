@@ -125,6 +125,7 @@ act_site_add() {
   # mu-plugin proxy-ssl (WP sau proxy nhận biết HTTPS)
   mkdir -p "$dir/wp-content/mu-plugins"
   cp "${WPF_ROOT}/assets/mu-plugins/proxy-ssl.php" "$dir/wp-content/mu-plugins/proxy-ssl.php" 2>/dev/null || true
+  cp "${WPF_ROOT}/assets/mu-plugins/latvps-hardening.php" "$dir/wp-content/mu-plugins/latvps-hardening.php" 2>/dev/null || true
 
   # plugin/theme cho affiliatecms
   if [ "$type" = "affiliatecms" ]; then
