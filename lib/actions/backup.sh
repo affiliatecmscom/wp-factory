@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/backup.sh — backup/restore site (db.sql + wp-content + config).
+# actions/backup.sh - backup/restore site (db.sql + wp-content + config).
 
 BACKUP_KEEP="${BACKUP_KEEP:-14}"
 

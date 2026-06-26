@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# lib/ui.sh — lớp giao diện trung lập. Có whiptail thì dùng TUI; không thì fallback menu số.
+# lib/ui.sh - lớp giao diện trung lập. Có whiptail thì dùng TUI; không thì fallback menu số.
 # Mọi hàm trả KẾT QUẢ qua stdout (để $() bắt được), vẽ UI ra stderr/terminal.
 
 HAS_WHIPTAIL=0
@@ -60,5 +60,5 @@ ui_msg() {
   fi
 }
 
-# ui_gauge_msg "TEXT" — thông báo tiến trình ngắn (không chặn). Dùng info() là đủ; alias cho rõ nghĩa.
+# ui_gauge_msg "TEXT" - thông báo tiến trình ngắn (không chặn). Dùng info() là đủ; alias cho rõ nghĩa.
 ui_note() { info "$@"; }

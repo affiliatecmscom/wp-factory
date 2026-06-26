@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# actions/setup.sh — bootstrap host (Docker + UFW + wp-cli + network + Caddy + symlink lat).
+# actions/setup.sh - bootstrap host (Docker + UFW + wp-cli + network + Caddy + symlink lat).
 # License: hỏi nhưng KHÔNG bắt buộc (site vanilla không cần). Idempotent.
 
 act_setup() {
   require_root
-  info "LATVPS — cài đặt host"
+  info "LATVPS - cài đặt host"
 
   # 1. Gói cơ bản
   info "Cập nhật apt + cài tiện ích cơ bản..."
@@ -13,12 +13,12 @@ act_setup() {
   apt-get install -y -qq ca-certificates curl gnupg openssl ufw rsync whiptail unzip git cron >/dev/null
   systemctl enable --now cron >/dev/null 2>&1 || true
 
-  # 1.5 Swap — RAM < ~2GB thì tạo swap 2GB để giảm OOM (VPS nhỏ chạy MariaDB/PHP/Docker).
+  # 1.5 Swap - RAM < ~2GB thì tạo swap 2GB để giảm OOM (VPS nhỏ chạy MariaDB/PHP/Docker).
   local mem_mb swap_mb
   mem_mb="$(free -m 2>/dev/null | awk '/^Mem:/{print $2}')"
   swap_mb="$(free -m 2>/dev/null | awk '/^Swap:/{print $2}')"
   if [ "${mem_mb:-9999}" -lt 1900 ] && [ "${swap_mb:-0}" -lt 1024 ] && [ ! -f /swapfile ]; then
-    info "RAM ${mem_mb}MB (<2GB) — tạo swap 2GB giảm OOM..."
+    info "RAM ${mem_mb}MB (<2GB) - tạo swap 2GB giảm OOM..."
     fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048 status=none 2>/dev/null
     chmod 600 /swapfile
     mkswap /swapfile >/dev/null 2>&1 && swapon /swapfile 2>/dev/null \
@@ -83,8 +83,8 @@ act_setup() {
   if [ -n "$(stored_license)" ]; then
     ok "Đã có license lưu sẵn."
   else
-    if ui_yesno "Nhập license AffiliateCMS bây giờ?\n(Khuyến nghị. Bỏ qua được — site vanilla không cần, site AffiliateCMS sẽ hỏi sau.)"; then
-      ensure_license || warn "Chưa nhập được license — bỏ qua, nhập sau khi tạo site AffiliateCMS."
+    if ui_yesno "Nhập license AffiliateCMS bây giờ?\n(Khuyến nghị. Bỏ qua được - site vanilla không cần, site AffiliateCMS sẽ hỏi sau.)"; then
+      ensure_license || warn "Chưa nhập được license - bỏ qua, nhập sau khi tạo site AffiliateCMS."
     else
       info "Bỏ qua license. Có thể nhập sau qua: lat license"
     fi

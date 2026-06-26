@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# latvps.sh — BOOTSTRAP 1 lệnh cho VPS Ubuntu trắng.
+# latvps.sh - BOOTSTRAP 1 lệnh cho VPS Ubuntu trắng.
 # Dùng:  curl -fsSL https://cdn.lat.vn/latvps.sh | sudo bash
 # Kéo bộ latvps về /opt/latvps rồi chạy setup (Docker/UFW/Caddy/license/symlink lat).
 set -euo pipefail
@@ -16,7 +16,7 @@ apt-get update -qq
 apt-get install -y -qq git curl ca-certificates >/dev/null
 
 if [ -x "${DEST}/bin/lat" ]; then
-  echo "[OK] Đã có ${DEST} — dùng bản hiện tại."
+  echo "[OK] Đã có ${DEST} - dùng bản hiện tại."
 elif [ -d "${DEST}/.git" ]; then
   echo "[*] Cập nhật ${DEST}..."
   git -C "$DEST" pull --ff-only || true

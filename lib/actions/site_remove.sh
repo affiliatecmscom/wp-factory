@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/site_remove.sh — gỡ sạch 1 site (container + volume + dir + origin cert + license slot).
+# actions/site_remove.sh - gỡ sạch 1 site (container + volume + dir + origin cert + license slot).
 
 act_site_remove() {
   require_root

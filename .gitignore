@@ -1,9 +1,9 @@
-# Bí mật + dữ liệu runtime — KHÔNG commit.
+# Bí mật + dữ liệu runtime - KHÔNG commit.
 .license
 proxy/.env
 bin/wp-cli.phar
 
-# Payload (plugin/theme) tải từ app.lat.vn gated license — không track.
+# Payload (plugin/theme) tải từ app.lat.vn gated license - không track.
 payload/plugins/
 payload/themes/
 payload/mu-plugins/

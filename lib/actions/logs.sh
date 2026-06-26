@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/logs.sh — xem log container của 1 site.
+# actions/logs.sh - xem log container của 1 site.
 
 act_logs() {
   require_root

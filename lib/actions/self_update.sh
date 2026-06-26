@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/self_update.sh — tự cập nhật bộ lệnh lat.
+# actions/self_update.sh - tự cập nhật bộ lệnh lat.
 # Ưu tiên git pull (nếu /opt/latvps là git repo); fallback tải tarball.
 # GIỮ nguyên: .license, proxy/.env, payload/, /opt/sites (đều ngoài git / gitignore).
 
@@ -24,7 +24,7 @@ act_self_update() {
   if [ -d "${WPF_ROOT}/.git" ] && need_cmd git; then
     info "Cập nhật qua git..."
     if git -C "$WPF_ROOT" pull --ff-only >/dev/null 2>&1; then
-      _syntax_ok "$WPF_ROOT" || { warn "Bản mới có lỗi cú pháp — cân nhắc rollback bằng git."; return 1; }
+      _syntax_ok "$WPF_ROOT" || { warn "Bản mới có lỗi cú pháp - cân nhắc rollback bằng git."; return 1; }
       chmod +x "${WPF_ROOT}/bin/lat" 2>/dev/null || true
       ln -sf "${WPF_ROOT}/bin/lat" /usr/local/bin/lat
       ui_msg "Đã cập nhật lat qua git.\nPhiên bản: $(_current_version)\nChạy lại 'lat' để dùng bản mới."
@@ -43,7 +43,7 @@ act_self_update() {
   # tarball giả định giải nén ra thư mục latvps/
   local newroot; newroot="$(find "$tmp" -maxdepth 2 -name VERSION -printf '%h\n' | head -1)"
   [ -n "$newroot" ] || newroot="${tmp}/latvps"
-  _syntax_ok "$newroot" || { warn "Bản mới lỗi cú pháp — huỷ."; rm -rf "$tmp"; return 1; }
+  _syntax_ok "$newroot" || { warn "Bản mới lỗi cú pháp - huỷ."; rm -rf "$tmp"; return 1; }
 
   info "Áp bản mới (giữ license/sites/payload)..."
   rsync -a --delete \

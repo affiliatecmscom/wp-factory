@@ -51,7 +51,7 @@ blob=json.dumps(out)
 import re
 bad=re.findall(r'sk-[A-Za-z0-9]{6,}|AIza[0-9A-Za-z_\-]{10,}|-----BEGIN|ACMS-[0-9A-F]{4}-', blob)
 if bad:
-    raise SystemExit(f"!! PHÁT HIỆN SECRET trong export: {set(bad)} — DỪNG, không ghi file.")
+    raise SystemExit(f"!! PHÁT HIỆN SECRET trong export: {set(bad)} - DỪNG, không ghi file.")
 
 with open(OUT,"w") as f: json.dump(out,f,ensure_ascii=False,indent=1)
 print(f"\nĐã ghi {OUT}  ({len(out)} option, {len(blob)} bytes)")

@@ -1,11 +1,11 @@
-# LATVPS — `lat` CLI
+# LATVPS - `lat` CLI
 
 Quản lý nhiều **WordPress** site trên một VPS Ubuntu, mỗi site **cô lập** (DB + Redis + network +
 volume riêng) để một site bị hack không lây sang site khác. Một lệnh duy nhất: **`lat`**.
 
 > Kiến trúc chuẩn production: **nginx-proxy** (front) + mỗi site **nginx + php-fpm + MariaDB + Redis**.
 
-## Cài đặt (VPS Ubuntu trắng) — 1 lần
+## Cài đặt (VPS Ubuntu trắng) - 1 lần
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/affiliatecmscom/latvps/main/latvps.sh | sudo bash
@@ -26,7 +26,7 @@ Internet → Cloudflare → nginx-proxy + acme-companion  (CHUNG, :80/:443, /opt
 nginx-proxy tự route domain theo `VIRTUAL_HOST` của container `_web` mỗi site → thêm/bớt site không
 cần sửa config proxy. Chỉ `_web` chạm network chung; DB/Redis/file mỗi site cô lập.
 
-## HTTPS — 2 chế độ (chọn lúc tạo site)
+## HTTPS - 2 chế độ (chọn lúc tạo site)
 
 - **Auto Let's Encrypt**: domain trỏ thẳng về VPS (hoặc Cloudflare DNS-only). acme-companion tự cấp cert.
 - **Cloudflare Origin Cert**: dán cert+key (Cloudflare > SSL/TLS > Origin Server) → lưu

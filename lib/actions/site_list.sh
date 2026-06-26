@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/site_list.sh — liệt kê site dạng bảng (cho `lat ls`).
+# actions/site_list.sh - liệt kê site dạng bảng (cho `lat ls`).
 
 act_site_list_print() {
   local ids; ids="$(list_site_ids)"

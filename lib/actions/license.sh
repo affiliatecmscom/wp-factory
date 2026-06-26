@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/license.sh — quản lý license key + helper ensure_license (validate qua app.lat.vn).
+# actions/license.sh - quản lý license key + helper ensure_license (validate qua app.lat.vn).
 
 # Hỏi + validate + lưu license. Trả 0 nếu cuối cùng có license hợp lệ.
 # Lặp tới khi hợp lệ hoặc user huỷ.
@@ -48,7 +48,7 @@ act_license() {
   require_root
   while true; do
     local choice
-    choice="$(ui_menu "License — $(license_summary | tr '\n' ' ')" \
+    choice="$(ui_menu "License - $(license_summary | tr '\n' ' ')" \
       1 "Đổi / nhập license key" \
       2 "Xem chi tiết license" \
       0 "Quay lại")" || return 0

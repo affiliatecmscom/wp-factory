@@ -1,4 +1,4 @@
-# Kiến trúc VPS học viên — LATVPS (reference design)
+# Kiến trúc VPS học viên - LATVPS (reference design)
 
 > Bản thiết kế chuẩn cho **1 VPS Ubuntu trắng của học viên** chạy nhiều WordPress site
 > AffiliateCMS, cô lập để 1 site bị hack không lây sang site khác. Tài liệu để DUYỆT trước
@@ -12,11 +12,11 @@
 
 ## 1. Mục tiêu & nguyên tắc
 
-1. **1 lệnh là chạy** — học viên không cần kiến thức DevOps.
-2. **Cô lập là mặc định** — mỗi site là 1 hộp kín; thủng 1 site không lan ra site khác.
-3. **Bề mặt tấn công tối thiểu** — chỉ 3 cổng public (22/80/443), không lộ DB/WP ra ngoài.
-4. **Nhân bản dễ** — cùng 1 bộ script chạy trên mọi VPS trắng, không cấu hình thủ công.
-5. **Stateless tool, stateful data** — script (`/opt/latvps`) tách khỏi dữ liệu site
+1. **1 lệnh là chạy** - học viên không cần kiến thức DevOps.
+2. **Cô lập là mặc định** - mỗi site là 1 hộp kín; thủng 1 site không lan ra site khác.
+3. **Bề mặt tấn công tối thiểu** - chỉ 3 cổng public (22/80/443), không lộ DB/WP ra ngoài.
+4. **Nhân bản dễ** - cùng 1 bộ script chạy trên mọi VPS trắng, không cấu hình thủ công.
+5. **Stateless tool, stateful data** - script (`/opt/latvps`) tách khỏi dữ liệu site
    (`/opt/sites`); xoá/cài lại tool không mất site.
 
 ---
@@ -127,7 +127,7 @@ container site hoàn toàn không có cổng host nào.
 
 | Tài nguyên | Kẻ tấn công làm được gì từ trong site A? | Vì sao bị chặn |
 |---|---|---|
-| DB của A | Có (đúng phạm vi A) | Chấp nhận — chỉ mất dữ liệu A |
+| DB của A | Có (đúng phạm vi A) | Chấp nhận - chỉ mất dữ liệu A |
 | DB của B, C | **Không** | Khác network, không resolve/không route |
 | File site B, C | **Không** | Bind-mount riêng, container A không thấy |
 | Root của host | Rất khó | `no-new-privileges`, container không privileged |
@@ -210,7 +210,7 @@ install.sh ──▶ host sẵn sàng (Docker, UFW, Caddy, license)
 | 4 GB | 5-7 | |
 | 8 GB | 12-15 | |
 
-**[ĐỀ XUẤT]** `install.sh` tạo swapfile (vd 2GB) nếu VPS < 4GB RAM — MariaDB + PHP dễ OOM
+**[ĐỀ XUẤT]** `install.sh` tạo swapfile (vd 2GB) nếu VPS < 4GB RAM - MariaDB + PHP dễ OOM
 trên VPS nhỏ.
 
 ---
@@ -237,9 +237,9 @@ trên VPS nhỏ.
 ## 13. Khác biệt so với bản đã build (đề xuất tinh chỉnh)
 
 Bản hiện tại đã đúng kiến trúc lõi (network/port/isolation). Để đạt chuẩn thiết kế này, đề
-xuất bổ sung — sẽ làm sau khi bạn duyệt:
+xuất bổ sung - sẽ làm sau khi bạn duyệt:
 
-1. **`backup.sh`** + cron mẫu (mục 8) — hiện chưa có.
+1. **`backup.sh`** + cron mẫu (mục 8) - hiện chưa có.
 2. **Hardening trong `install.sh`** (mục 12): swap, SSH key-only, fail2ban,
    unattended-upgrades, `enable_icc=false`.
 3. **`cpus:` limit** thêm cạnh `mem_limit` trong template (chặn 1 site ngốn CPU).

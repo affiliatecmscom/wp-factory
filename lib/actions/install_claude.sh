@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/install_claude.sh — cài Claude Code (CLI Anthropic) cho học viên trên VPS.
+# actions/install_claude.sh - cài Claude Code (CLI Anthropic) cho học viên trên VPS.
 # Native installer (không cần Node). Tự thêm PATH (installer KHÔNG tự làm trên root trắng).
 # Auth headless: ANTHROPIC_API_KEY hoặc CLAUDE_CODE_OAUTH_TOKEN.
 
@@ -34,7 +34,7 @@ _claude_save_env() {
 _claude_auth_prompt() {
   local choice
   choice="$(ui_menu "Đăng nhập Claude Code (VPS headless)" \
-    oauth  "OAuth token — dùng gói Claude Pro/Max (khuyến nghị)" \
+    oauth  "OAuth token - dùng gói Claude Pro/Max (khuyến nghị)" \
     apikey "API key sk-ant-... (console.anthropic.com, tính theo token)" \
     skip   "Bỏ qua, đăng nhập sau")" || return 0
   case "$choice" in
@@ -46,12 +46,12 @@ _claude_auth_prompt() {
         # token được ưu tiên -> xoá API key cũ (nếu có) để không bị đè
         sed -i '/^export ANTHROPIC_API_KEY=/d' "$CLAUDE_ENV_FILE" 2>/dev/null || true
         _claude_save_env CLAUDE_CODE_OAUTH_TOKEN "$t"; ok "Đã lưu OAuth token."
-      else warn "Bỏ trống — bỏ qua."; fi
+      else warn "Bỏ trống - bỏ qua."; fi
       ;;
     apikey)
       local k; k="$(ui_input "Dán ANTHROPIC_API_KEY (sk-ant-...):" "")" || return 0
       k="$(printf '%s' "$k" | tr -d '[:space:]')"
-      [ -n "$k" ] && { _claude_save_env ANTHROPIC_API_KEY "$k"; ok "Đã lưu API key."; } || warn "Bỏ trống — bỏ qua."
+      [ -n "$k" ] && { _claude_save_env ANTHROPIC_API_KEY "$k"; ok "Đã lưu API key."; } || warn "Bỏ trống - bỏ qua."
       ;;
     *) info "Bỏ qua auth. Đăng nhập sau: set ANTHROPIC_API_KEY hoặc CLAUDE_CODE_OAUTH_TOKEN.";;
   esac
@@ -79,7 +79,7 @@ act_install_claude() {
 
   need_cmd curl || { ui_msg "Thiếu curl. Chạy: apt-get install -y curl"; return 1; }
   info "Cài Claude Code (native installer)..."
-  curl -fsSL https://claude.ai/install.sh | bash || { ui_msg "Cài thất bại — kiểm mạng/quyền."; return 1; }
+  curl -fsSL https://claude.ai/install.sh | bash || { ui_msg "Cài thất bại - kiểm mạng/quyền."; return 1; }
 
   _claude_ensure_path
   local ver; ver="$("$CLAUDE_BIN" --version 2>/dev/null)"

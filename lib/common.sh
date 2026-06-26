@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# lib/common.sh — helper dùng chung cho mọi script của LATVPS.
+# lib/common.sh - helper dùng chung cho mọi script của LATVPS.
 # Source file này ở đầu mỗi script:  source "$(dirname "$0")/lib/common.sh"
 
 # Đường dẫn gốc của factory (thư mục chứa lib/).
@@ -131,7 +131,7 @@ license_deactivate() {
 }
 
 # ============================================================
-# Site registry — mỗi site 1 thư mục /opt/sites/<id> + site.conf.
+# Site registry - mỗi site 1 thư mục /opt/sites/<id> + site.conf.
 # ID bất biến (sinh lúc tạo); domain là thuộc tính đổi được.
 # ============================================================
 BACKUPS_ROOT="/opt/backups"
@@ -231,7 +231,7 @@ fix_perms() {
 # Dùng wp eval + update_option (serialize đúng). Chỉ áp cho site affiliatecms.
 acms_import_config() {
   local id="$1" f="${WPF_ROOT}/assets/acms-config/options.json"
-  [ -f "$f" ] || { info "Không có config bundle — bỏ qua import (dùng default plugin)."; return 0; }
+  [ -f "$f" ] || { info "Không có config bundle - bỏ qua import (dùng default plugin)."; return 0; }
   docker cp "$f" "${id}_php:/tmp/acms-config.json" >/dev/null 2>&1 || { warn "Copy config vào container lỗi."; return 1; }
   wp_run "$id" eval 'foreach((array)json_decode(file_get_contents("/tmp/acms-config.json"),true) as $k=>$v){ update_option($k,$v); }' >/dev/null 2>&1 \
     && ok "Đã import config (giống demo, không gồm license/API)." || warn "Import config gặp lỗi."
@@ -247,7 +247,7 @@ host_ready() {
 }
 
 # ============================================================
-# Payload — tải plugin/theme AffiliateCMS từ license server (app.lat.vn),
+# Payload - tải plugin/theme AffiliateCMS từ license server (app.lat.vn),
 # gated theo license. Repo KHÔNG chứa source plugin (payload/ gitignore).
 # ============================================================
 
@@ -270,7 +270,7 @@ payload_present() {
 fetch_payload() {
   local key="$1"
   [ -n "$key" ] || { warn "Cần license để tải payload."; return 1; }
-  ensure_unzip || { warn "Thiếu unzip — không giải nén được payload."; return 1; }
+  ensure_unzip || { warn "Thiếu unzip - không giải nén được payload."; return 1; }
   local payload="${WPF_ROOT}/payload" tmp; tmp="$(mktemp -d)"
   mkdir -p "${payload}/plugins" "${payload}/themes"
   local rc=0 p

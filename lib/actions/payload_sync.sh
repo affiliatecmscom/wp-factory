@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/payload_sync.sh — cập nhật plugin/theme bundle (payload/).
+# actions/payload_sync.sh - cập nhật plugin/theme bundle (payload/).
 # Mặc định: tải mới nhất từ license server (app.lat.vn) gated theo license.
 # Dev: `lat payload-sync --from /path/to/wp-content` rsync từ nguồn local.
 # Chỉ ảnh hưởng site affiliatecms tạo SAU. Site đã tạo update qua wp-admin.

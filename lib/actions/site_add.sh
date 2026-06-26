@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/site_add.sh — thêm 1 WordPress site cô lập (nginx + php-fpm + mariadb + redis).
+# actions/site_add.sh - thêm 1 WordPress site cô lập (nginx + php-fpm + mariadb + redis).
 # SSL: auto (Let's Encrypt) hoặc origin (Cloudflare Origin Cert). Loại: affiliatecms | vanilla.
 # Dùng: act_site_add [domain] [--type t] [--ssl auto|origin] [--email e] [--license k]
 
@@ -83,7 +83,7 @@ act_site_add() {
   mkdir -p "$dir/wp-content"
 
   _add_rollback() {
-    warn "Lỗi khi tạo site — dọn dẹp..."
+    warn "Lỗi khi tạo site - dọn dẹp..."
     docker compose -f "$dir/docker-compose.yml" --env-file "$dir/.env" down -v >/dev/null 2>&1 || true
     rm -rf "$dir"
     ssl_remove_origin "$domain"; ssl_remove_origin "www.${domain}"
@@ -161,10 +161,10 @@ act_site_add() {
 
   if [ "$type" = "affiliatecms" ]; then
     # Plugin PHỤ THUỘC (giống demo iflmmo): Rank Math (AffiliateCMS tích hợp SEO/schema sâu) +
-    # Classic Editor. Tải từ wordpress.org qua wp-cli — KHÔNG có sẽ thiếu SEO/schema.
+    # Classic Editor. Tải từ wordpress.org qua wp-cli - KHÔNG có sẽ thiếu SEO/schema.
     info "Cài plugin phụ thuộc (Rank Math SEO + Classic Editor)..."
     wp_run "$id" plugin install seo-by-rank-math classic-editor --activate >/dev/null 2>&1 \
-      || warn "Cài Rank Math/Classic Editor lỗi (kiểm mạng) — vào wp-admin cài tay: seo-by-rank-math, classic-editor."
+      || warn "Cài Rank Math/Classic Editor lỗi (kiểm mạng) - vào wp-admin cài tay: seo-by-rank-math, classic-editor."
     info "Kích hoạt theme + plugin AffiliateCMS..."
     wp_run "$id" theme activate affiliateCMS-theme >/dev/null 2>&1 || warn "Chưa activate được theme."
     wp_run "$id" plugin activate affiliatecms-pro affiliatecms-ai >/dev/null 2>&1 || warn "Chưa activate được plugin."
@@ -173,9 +173,9 @@ act_site_add() {
     acms_import_config "$id"
     if [ -n "$license" ]; then
       wp_run "$id" option update acms_license_key "$license" >/dev/null 2>&1 || true
-      license_activate "$license" "$domain" && ok "License đã activate." || warn "Activate license thất bại — xử lý sau trong wp-admin."
+      license_activate "$license" "$domain" && ok "License đã activate." || warn "Activate license thất bại - xử lý sau trong wp-admin."
     else
-      warn "Chưa có license — activate sau trong wp-admin."
+      warn "Chưa có license - activate sau trong wp-admin."
     fi
   fi
 

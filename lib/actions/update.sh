@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/update.sh — cập nhật HỆ THỐNG: image Caddy + WP/MariaDB từng site, vá OS (tuỳ chọn).
+# actions/update.sh - cập nhật HỆ THỐNG: image Caddy + WP/MariaDB từng site, vá OS (tuỳ chọn).
 # Plugin/theme AffiliateCMS KHÔNG ở đây (update qua license server / payload-sync).
 
 act_update() {

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/status.sh — tổng quan hệ thống (text).
+# actions/status.sh - tổng quan hệ thống (text).
 
 status_text() {
   local total=0 aff=0 van=0 up=0 id typ st
@@ -15,7 +15,7 @@ status_text() {
   local mem; mem="$(free -h 2>/dev/null | awk '/Mem:/{print $3" / "$2}')"
   local disk; disk="$(df -h / 2>/dev/null | awk 'NR==2{print $3" / "$2" ("$5")"}')"
 
-  printf 'LATVPS — trạng thái\n\n'
+  printf 'LATVPS - trạng thái\n\n'
   printf 'Site        : %s (AffiliateCMS: %s, vanilla: %s)\n' "$total" "$aff" "$van"
   printf 'Đang chạy   : %s/%s\n' "$up" "$total"
   printf 'Proxy       : %s\n' "$proxy_st"

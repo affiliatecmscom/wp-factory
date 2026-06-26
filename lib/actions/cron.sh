@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/cron.sh — quản lý cronjob: tự cài cron AffiliateCMS cho 1 site, hoặc thêm cron tuỳ chọn.
+# actions/cron.sh - quản lý cronjob: tự cài cron AffiliateCMS cho 1 site, hoặc thêm cron tuỳ chọn.
 # Cron gọi qua nginx-proxy local (--resolve 127.0.0.1) -> không phụ thuộc DNS/Cloudflare ngoài.
 
 # Chọn 1 site -> in id ra stdout (rỗng nếu huỷ/không có).
@@ -25,7 +25,7 @@ _cron_install_site() {
   [ -n "$id" ] || return 0
   local domain type; domain="$(site_get "$id" DOMAIN)"; type="$(site_get "$id" TYPE)"
   if [ "$type" != "affiliatecms" ]; then
-    ui_yesno "Site ${domain} không phải AffiliateCMS — cron này chỉ hợp cho AffiliateCMS. Vẫn cài?" || return 0
+    ui_yesno "Site ${domain} không phải AffiliateCMS - cron này chỉ hợp cho AffiliateCMS. Vẫn cài?" || return 0
   fi
 
   info "Lấy token cron của site..."
@@ -41,7 +41,7 @@ _cron_install_site() {
   local base="https://${domain}/wp-json"
   local block
   block="$(cat <<EOF
-# >>> latvps ${id} >>>  (AffiliateCMS cron — ${domain})
+# >>> latvps ${id} >>>  (AffiliateCMS cron - ${domain})
 */5 * * * * ${c} "${base}/acms/v1/automation/scrape" -H "X-ACMS-Token: ${token}" >/dev/null 2>&1
 */5 * * * * ${c} "${base}/acms/v1/automation/process-scheduled" -H "X-ACMS-Token: ${token}" >/dev/null 2>&1
 */5 * * * * ${c} "${base}/acms/v1/automation/process-queue?limit=10" -H "X-ACMS-Token: ${token}" >/dev/null 2>&1

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# lat — CLI quản lý LATVPS. Không tham số -> menu TUI; có subcommand -> chạy thẳng.
+# lat - CLI quản lý LATVPS. Không tham số -> menu TUI; có subcommand -> chạy thẳng.
 set -euo pipefail
 
 # Tìm thư mục thật (theo symlink /usr/local/bin/lat -> /opt/latvps/bin/lat).
@@ -15,7 +15,7 @@ source "${WPF_ROOT}/lib/menu.sh"
 
 print_help() {
   cat <<EOF
-lat — quản lý LATVPS (nhiều WordPress site cô lập trên 1 VPS)
+lat - quản lý LATVPS (nhiều WordPress site cô lập trên 1 VPS)
 
   lat                          mở menu quản lý (TUI)
   lat add [domain] [--type affiliatecms|vanilla] [--ssl auto|origin] [--email e]

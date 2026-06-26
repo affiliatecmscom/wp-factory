@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/site_domain.sh — đổi domain của site. Container/DB GIỮ NGUYÊN (định danh theo ID).
+# actions/site_domain.sh - đổi domain của site. Container/DB GIỮ NGUYÊN (định danh theo ID).
 # Chỉ đổi: DB search-replace, license, Caddy block, site.conf.
 
 act_site_domain() {
@@ -37,7 +37,7 @@ act_site_domain() {
     if [ -n "$key" ]; then
       info "Chuyển license sang domain mới..."
       license_deactivate "$key" "$old" || true
-      license_activate "$key" "$new" && ok "License activate cho ${new}." || warn "Activate domain mới thất bại — xử lý sau."
+      license_activate "$key" "$new" && ok "License activate cho ${new}." || warn "Activate domain mới thất bại - xử lý sau."
     fi
   fi
 
@@ -55,13 +55,13 @@ act_site_domain() {
     if printf '%s' "$cert" | grep -q 'BEGIN CERTIFICATE'; then
       ssl_save_origin "$new" "$cert" "$key"; ssl_save_origin "www.${new}" "$cert" "$key"
     else
-      warn "Bỏ qua cert — thả cert vào /opt/proxy/certs/${new}.crt|.key sau."
+      warn "Bỏ qua cert - thả cert vào /opt/proxy/certs/${new}.crt|.key sau."
     fi
   fi
   sed -i "s|^VIRTUAL_HOST=.*|VIRTUAL_HOST=${new},www.${new}|" "$dir/.env"
   sed -i "s|^LE_HOST=.*|LE_HOST=${le_host}|" "$dir/.env"
   docker compose -f "$dir/docker-compose.yml" --env-file "$dir/.env" up -d --force-recreate web >/dev/null 2>&1 \
-    || warn "Recreate web lỗi — kiểm 'lat logs ${id} web'."
+    || warn "Recreate web lỗi - kiểm 'lat logs ${id} web'."
 
   # 4. site.conf
   site_set "$id" DOMAIN "$new"
