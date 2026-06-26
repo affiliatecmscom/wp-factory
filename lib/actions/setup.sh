@@ -13,6 +13,23 @@ act_setup() {
   apt-get install -y -qq ca-certificates curl gnupg openssl ufw rsync whiptail unzip git cron >/dev/null
   systemctl enable --now cron >/dev/null 2>&1 || true
 
+  # 1.5 Swap — RAM < ~2GB thì tạo swap 2GB để giảm OOM (VPS nhỏ chạy MariaDB/PHP/Docker).
+  local mem_mb swap_mb
+  mem_mb="$(free -m 2>/dev/null | awk '/^Mem:/{print $2}')"
+  swap_mb="$(free -m 2>/dev/null | awk '/^Swap:/{print $2}')"
+  if [ "${mem_mb:-9999}" -lt 1900 ] && [ "${swap_mb:-0}" -lt 1024 ] && [ ! -f /swapfile ]; then
+    info "RAM ${mem_mb}MB (<2GB) — tạo swap 2GB giảm OOM..."
+    fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048 status=none 2>/dev/null
+    chmod 600 /swapfile
+    mkswap /swapfile >/dev/null 2>&1 && swapon /swapfile 2>/dev/null \
+      && { grep -q '/swapfile' /etc/fstab 2>/dev/null || echo '/swapfile none swap sw 0 0' >> /etc/fstab; ok "Đã bật swap 2GB."; } \
+      || warn "Tạo swap không thành (bỏ qua)."
+    sysctl -w vm.swappiness=10 >/dev/null 2>&1 || true
+    grep -q '^vm.swappiness' /etc/sysctl.conf 2>/dev/null || echo 'vm.swappiness=10' >> /etc/sysctl.conf
+  elif [ -f /swapfile ] || [ "${swap_mb:-0}" -ge 1024 ]; then
+    ok "Đã có swap."
+  fi
+
   # 2. Docker CE + compose
   if need_cmd docker && docker compose version >/dev/null 2>&1; then
     ok "Docker đã có sẵn."
