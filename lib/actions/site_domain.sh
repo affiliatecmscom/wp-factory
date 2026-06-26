@@ -5,7 +5,7 @@
 act_site_domain() {
   require_root
   local arg="${1:-}" new="${2:-}"
-  [ -n "$arg" ] || { warn "Dùng: iflmmo domain <id|domain> <new-domain>"; return 1; }
+  [ -n "$arg" ] || { warn "Dùng: lat domain <id|domain> <new-domain>"; return 1; }
   local id; id="$(resolve_site "$arg")" || { warn "Không tìm thấy site: $arg"; return 1; }
 
   local old; old="$(site_get "$id" DOMAIN)"

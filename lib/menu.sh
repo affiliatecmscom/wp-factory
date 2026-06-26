@@ -2,10 +2,10 @@
 # lib/menu.sh — các menu TUI tương tác. Gọi vào act_* trong lib/actions/.
 
 main_menu() {
-  host_ready || { ui_msg "Host chưa sẵn sàng (thiếu Docker/Caddy).\n\nChạy lệnh cài đặt 1 lần trước:\n  curl -fsSL https://cdn.lat.vn/iflmmo.sh | sudo bash"; exit 1; }
+  host_ready || { ui_msg "Host chưa sẵn sàng (thiếu Docker/Caddy).\n\nChạy lệnh cài đặt 1 lần trước:\n  curl -fsSL https://cdn.lat.vn/latvps.sh | sudo bash"; exit 1; }
   while true; do
     local c
-    c="$(ui_menu "WP Factory — quản lý site" \
+    c="$(ui_menu "LATVPS — quản lý site" \
       1 "Thêm site mới" \
       2 "Quản lý site" \
       3 "Backup tất cả" \
@@ -88,8 +88,8 @@ maintenance_menu() {
   while true; do
     local c
     c="$(ui_menu "Bảo trì / nâng cao" \
-      1 "Cập nhật hệ thống (image WP/MariaDB/Caddy + OS)" \
-      2 "Cập nhật lệnh iflmmo (self-update)" \
+      1 "Cập nhật hệ thống (image WP/MariaDB/Caddy + OS) [lat upgrade]" \
+      2 "Cập nhật lệnh lat (code) [lat update]" \
       3 "Cập nhật plugin payload (cho site tạo sau)" \
       4 "Cloudflare DNS (bật proxy thoải mái)" \
       5 "Chạy lại setup host (idempotent)" \

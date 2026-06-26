@@ -4,7 +4,7 @@
 
 act_site_add() {
   require_root
-  host_ready || { ui_msg "Host chưa sẵn sàng. Chạy: iflmmo setup"; return 1; }
+  host_ready || { ui_msg "Host chưa sẵn sàng. Chạy: lat setup"; return 1; }
 
   local domain="" type="" canonical="" email="" license=""
   while [ $# -gt 0 ]; do

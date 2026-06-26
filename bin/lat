@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# lat — CLI quản lý LATVPS. Không tham số -> menu TUI; có subcommand -> chạy thẳng.
+set -euo pipefail
+
+# Tìm thư mục thật (theo symlink /usr/local/bin/lat -> /opt/latvps/bin/lat).
+SELF="$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")"
+BIN_DIR="$(cd "$(dirname "$SELF")" && pwd)"
+ROOT_DIR="$(cd "${BIN_DIR}/.." && pwd)"
+
+# common.sh tự set WPF_ROOT đúng (theo vị trí của chính nó).
+source "${ROOT_DIR}/lib/common.sh"
+source "${ROOT_DIR}/lib/ui.sh"
+for a in "${WPF_ROOT}"/lib/actions/*.sh; do source "$a"; done
+source "${WPF_ROOT}/lib/menu.sh"
+
+print_help() {
+  cat <<EOF
+lat — quản lý LATVPS (nhiều WordPress site cô lập trên 1 VPS)
+
+  lat                          mở menu quản lý (TUI)
+  lat add [domain] [--type affiliatecms|vanilla] [--canonical www|non-www|none] [--email e]
+  lat ls                       liệt kê site
+  lat rm <id|domain> [--yes]   xoá site
+  lat domain <id|domain> <new-domain>
+  lat canonical <id|domain> <www|non-www|none>
+  lat backup [id|domain|all]
+  lat restore <id|domain> <file.tar.gz>
+  lat license                  xem/đổi license
+  lat status                   trạng thái hệ thống
+  lat logs <id|domain> [wp|db]
+  lat update                   cập nhật chính lệnh lat (code, git pull)
+  lat upgrade                  cập nhật hệ thống (image WP/MariaDB/Caddy + OS)
+  lat install-claude           cài Claude Code (CLI Anthropic) + auth
+  lat cloudflare               bật/tắt Cloudflare DNS (DNS-01) để dùng proxy
+  lat payload-sync [src]       cập nhật plugin bundle
+  lat setup                    (lại) bootstrap host
+  lat version                  phiên bản
+EOF
+}
+
+cmd="${1:-menu}"; shift || true
+case "$cmd" in
+  menu)         require_root; main_menu ;;
+  add)          require_root; act_site_add "$@" ;;
+  ls|list)      act_site_list_print ;;
+  rm|remove)    require_root; act_site_remove "$@" ;;
+  domain)       require_root; act_site_domain "$@" ;;
+  canonical)    require_root; act_site_canonical "$@" ;;
+  backup)       require_root; act_backup "$@" ;;
+  restore)      require_root; act_restore "$@" ;;
+  license)      require_root; act_license ;;
+  status)       act_status ;;
+  logs)         require_root; act_logs "$@" ;;
+  update|self-update) require_root; act_self_update ;;
+  upgrade)      require_root; act_update ;;
+  install-claude|claude) require_root; act_install_claude ;;
+  cloudflare|cf) require_root; act_cloudflare ;;
+  payload-sync) require_root; act_payload_sync "$@" ;;
+  setup)        act_setup ;;
+  version|-v|--version) cat "${WPF_ROOT}/VERSION" 2>/dev/null || echo "unknown" ;;
+  -h|--help|help) print_help ;;
+  *) die "Lệnh không rõ: $cmd  (xem: lat --help)" ;;
+esac

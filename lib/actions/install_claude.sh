@@ -4,7 +4,7 @@
 # Auth headless: ANTHROPIC_API_KEY hoặc CLAUDE_CODE_OAUTH_TOKEN.
 
 CLAUDE_BIN="/root/.local/bin/claude"
-CLAUDE_ENV_DIR="/root/.config/iflmmo"
+CLAUDE_ENV_DIR="/root/.config/lat"
 CLAUDE_ENV_FILE="${CLAUDE_ENV_DIR}/claude-env"
 CLAUDE_BASHRC="/root/.bashrc"
 
@@ -23,9 +23,9 @@ _claude_save_env() {
   sed -i "/^export ${var}=/d" "$CLAUDE_ENV_FILE" 2>/dev/null || true
   printf 'export %s=%q\n' "$var" "$val" >> "$CLAUDE_ENV_FILE"
   chmod 600 "$CLAUDE_ENV_FILE"
-  local srcline='[ -f ~/.config/iflmmo/claude-env ] && . ~/.config/iflmmo/claude-env'
+  local srcline='[ -f ~/.config/lat/claude-env ] && . ~/.config/lat/claude-env'
   grep -qF "$srcline" "$CLAUDE_BASHRC" 2>/dev/null \
-    || printf '\n# Claude Code auth (iflmmo)\n%s\n' "$srcline" >> "$CLAUDE_BASHRC"
+    || printf '\n# Claude Code auth (lat)\n%s\n' "$srcline" >> "$CLAUDE_BASHRC"
   # nạp ngay cho process hiện tại
   export "${var}=${val}"
 }

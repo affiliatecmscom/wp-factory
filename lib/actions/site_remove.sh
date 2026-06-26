@@ -5,7 +5,7 @@ act_site_remove() {
   require_root
   local arg="${1:-}" assume_yes=0
   [ "${2:-}" = "--yes" ] && assume_yes=1
-  [ -n "$arg" ] || { warn "Dùng: iflmmo rm <id|domain>"; return 1; }
+  [ -n "$arg" ] || { warn "Dùng: lat rm <id|domain>"; return 1; }
 
   local id; id="$(resolve_site "$arg")" || { warn "Không tìm thấy site: $arg"; return 1; }
   local dir; dir="$(site_dir "$id")"

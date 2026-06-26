@@ -1,10 +1,10 @@
-# Kiến trúc VPS học viên — WP Factory (reference design)
+# Kiến trúc VPS học viên — LATVPS (reference design)
 
 > Bản thiết kế chuẩn cho **1 VPS Ubuntu trắng của học viên** chạy nhiều WordPress site
 > AffiliateCMS, cô lập để 1 site bị hack không lây sang site khác. Tài liệu để DUYỆT trước
 > khi sửa config thật. Phần "Đề xuất bổ sung" là cái nên thêm so với bản đã build.
 >
-> **Cập nhật:** thao tác giờ qua **một lệnh `iflmmo`** (menu TUI + subcommand) thay cho các script
+> **Cập nhật:** thao tác giờ qua **một lệnh `lat`** (menu TUI + subcommand) thay cho các script
 > rời. Xem `README.md`. Kiến trúc hạ tầng/cô lập bên dưới vẫn nguyên; định danh site đổi sang **ID
 > bất biến** (domain là thuộc tính, đổi domain không tạo lại container).
 
@@ -16,7 +16,7 @@
 2. **Cô lập là mặc định** — mỗi site là 1 hộp kín; thủng 1 site không lan ra site khác.
 3. **Bề mặt tấn công tối thiểu** — chỉ 3 cổng public (22/80/443), không lộ DB/WP ra ngoài.
 4. **Nhân bản dễ** — cùng 1 bộ script chạy trên mọi VPS trắng, không cấu hình thủ công.
-5. **Stateless tool, stateful data** — script (`/opt/wp-factory`) tách khỏi dữ liệu site
+5. **Stateless tool, stateful data** — script (`/opt/latvps`) tách khỏi dữ liệu site
    (`/opt/sites`); xoá/cài lại tool không mất site.
 
 ---
@@ -58,7 +58,7 @@ giữa các site.
 
 ```
 /opt/
-├── wp-factory/                 # TOOL (track git, nhân bản sang VPS khác)
+├── latvps/                 # TOOL (track git, nhân bản sang VPS khác)
 │   ├── install.sh              # bootstrap VPS trắng
 │   ├── new-site.sh             # dựng 1 site
 │   ├── remove-site.sh          # gỡ 1 site
@@ -85,7 +85,7 @@ giữa các site.
     └── my-deals.com/2026-06-26.tar.gz
 ```
 
-**Nguyên tắc:** `wp-factory` = code (xoá được, cài lại từ git). `sites` + `backups` = dữ liệu
+**Nguyên tắc:** `latvps` = code (xoá được, cài lại từ git). `sites` + `backups` = dữ liệu
 (phải giữ + backup). Phân tách rõ để học viên không xoá nhầm.
 
 ---

@@ -11,7 +11,7 @@ ui_menu() {
   if [ "$HAS_WHIPTAIL" = 1 ]; then
     local n=$(( $# / 2 ))
     [ "$n" -gt 12 ] && n=12
-    whiptail --title "iflmmo" --notags --menu "$title" 20 74 "$n" "$@" 3>&1 1>&2 2>&3
+    whiptail --title "lat" --notags --menu "$title" 20 74 "$n" "$@" 3>&1 1>&2 2>&3
     return $?
   fi
   # Fallback: in danh sách ra stderr, đọc tag từ tty.
@@ -30,7 +30,7 @@ ui_menu() {
 ui_input() {
   local prompt="$1" def="${2:-}"
   if [ "$HAS_WHIPTAIL" = 1 ]; then
-    whiptail --title "iflmmo" --inputbox "$prompt" 11 74 "$def" 3>&1 1>&2 2>&3
+    whiptail --title "lat" --inputbox "$prompt" 11 74 "$def" 3>&1 1>&2 2>&3
     return $?
   fi
   printf '%s [%s]: ' "$prompt" "$def" >&2
@@ -42,7 +42,7 @@ ui_input() {
 ui_yesno() {
   local msg="$1"
   if [ "$HAS_WHIPTAIL" = 1 ]; then
-    whiptail --title "iflmmo" --yesno "$msg" 12 74
+    whiptail --title "lat" --yesno "$msg" 12 74
     return $?
   fi
   printf '%s [y/N]: ' "$msg" >&2
@@ -53,7 +53,7 @@ ui_yesno() {
 # ui_msg "TEXT" -> hiện thông báo.
 ui_msg() {
   if [ "$HAS_WHIPTAIL" = 1 ]; then
-    whiptail --title "iflmmo" --scrolltext --msgbox "$1" 20 74
+    whiptail --title "lat" --scrolltext --msgbox "$1" 20 74
   else
     printf '\n%s\n' "$1" >&2
     printf '[Enter để tiếp tục] ' >&2; read -r _ </dev/tty || true

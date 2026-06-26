@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# actions/setup.sh — bootstrap host (Docker + UFW + wp-cli + network + Caddy + symlink iflmmo).
+# actions/setup.sh — bootstrap host (Docker + UFW + wp-cli + network + Caddy + symlink lat).
 # License: hỏi nhưng KHÔNG bắt buộc (site vanilla không cần). Idempotent.
 
 act_setup() {
   require_root
-  info "WP Factory — cài đặt host"
+  info "LATVPS — cài đặt host"
 
   # 1. Gói cơ bản
   info "Cập nhật apt + cài tiện ích cơ bản..."
@@ -68,7 +68,7 @@ act_setup() {
     if ui_yesno "Nhập license AffiliateCMS bây giờ?\n(Khuyến nghị. Bỏ qua được — site vanilla không cần, site AffiliateCMS sẽ hỏi sau.)"; then
       ensure_license || warn "Chưa nhập được license — bỏ qua, nhập sau khi tạo site AffiliateCMS."
     else
-      info "Bỏ qua license. Có thể nhập sau qua: iflmmo license"
+      info "Bỏ qua license. Có thể nhập sau qua: lat license"
     fi
   fi
 
@@ -85,12 +85,12 @@ act_setup() {
   caddy_compose up -d
   ok "Caddy đang chạy (cổng 80/443)."
 
-  # 8. Symlink iflmmo
-  ln -sf "${WPF_ROOT}/bin/iflmmo" /usr/local/bin/iflmmo
-  chmod +x "${WPF_ROOT}/bin/iflmmo"
-  ok "Lệnh 'iflmmo' đã sẵn sàng."
+  # 8. Symlink lat
+  ln -sf "${WPF_ROOT}/bin/lat" /usr/local/bin/lat
+  chmod +x "${WPF_ROOT}/bin/lat"
+  ok "Lệnh 'lat' đã sẵn sàng."
 
-  ui_msg "Host đã sẵn sàng.\n\nGõ:  iflmmo   để mở menu quản lý.\nTạo site nhanh:  iflmmo add <domain>\n\nNhớ trỏ A record của domain về IP VPS này trước khi tạo site."
+  ui_msg "Host đã sẵn sàng.\n\nGõ:  lat   để mở menu quản lý.\nTạo site nhanh:  lat add <domain>\n\nNhớ trỏ A record của domain về IP VPS này trước khi tạo site."
 
   # 9. Gợi ý tạo site đầu tiên
   if ui_yesno "Thêm site đầu tiên ngay?"; then

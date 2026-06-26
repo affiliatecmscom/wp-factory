@@ -4,7 +4,7 @@
 act_site_canonical() {
   require_root
   local arg="${1:-}" canonical="${2:-}"
-  [ -n "$arg" ] || { warn "Dùng: iflmmo canonical <id|domain> <www|non-www|none>"; return 1; }
+  [ -n "$arg" ] || { warn "Dùng: lat canonical <id|domain> <www|non-www|none>"; return 1; }
   local id; id="$(resolve_site "$arg")" || { warn "Không tìm thấy site: $arg"; return 1; }
   local domain; domain="$(site_get "$id" DOMAIN)"
 

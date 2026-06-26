@@ -45,7 +45,7 @@ act_backup() {
 act_restore() {
   require_root
   local arg="${1:-}" file="${2:-}"
-  [ -n "$arg" ] && [ -n "$file" ] || { warn "Dùng: iflmmo restore <id|domain> <file.tar.gz>"; return 1; }
+  [ -n "$arg" ] && [ -n "$file" ] || { warn "Dùng: lat restore <id|domain> <file.tar.gz>"; return 1; }
   [ -f "$file" ] || { warn "Không thấy file: $file"; return 1; }
   local id; id="$(resolve_site "$arg")" || { warn "Không tìm thấy site: $arg"; return 1; }
   local dir; dir="$(site_dir "$id")"

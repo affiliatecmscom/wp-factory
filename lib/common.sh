@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# lib/common.sh — helper dùng chung cho mọi script của WP Factory.
+# lib/common.sh — helper dùng chung cho mọi script của LATVPS.
 # Source file này ở đầu mỗi script:  source "$(dirname "$0")/lib/common.sh"
 
 # Đường dẫn gốc của factory (thư mục chứa lib/).
@@ -200,7 +200,7 @@ wp_run() {
 # caddy_block <domain> <wp_container> <canonical:www|non-www|none> -> stdout
 caddy_block() {
   local domain="$1" wp="$2" canonical="$3"
-  printf '# %s (sinh bởi iflmmo)\n' "$domain"
+  printf '# %s (sinh bởi lat)\n' "$domain"
   case "$canonical" in
     www)
       cat <<EOF
@@ -262,7 +262,7 @@ caddy_env_get() {
 write_caddyfile() {
   local cf; cf="$(caddy_env_get CF_API_TOKEN 2>/dev/null || true)"
   {
-    printf '# Caddyfile trung tâm WP Factory (sinh bởi iflmmo). KHONG sua tay.\n'
+    printf '# Caddyfile trung tâm LATVPS (sinh bởi lat). KHONG sua tay.\n'
     printf '{\n'
     printf '\temail {$ACME_EMAIL}\n'
     [ -n "$cf" ] && printf '\tacme_dns cloudflare {env.CF_API_TOKEN}\n'
