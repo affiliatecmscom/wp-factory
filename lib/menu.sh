@@ -2,7 +2,7 @@
 # lib/menu.sh — các menu TUI tương tác. Gọi vào act_* trong lib/actions/.
 
 main_menu() {
-  host_ready || { ui_msg "Host chưa sẵn sàng (thiếu Docker/Caddy).\n\nChạy lệnh cài đặt 1 lần trước:\n  curl -fsSL https://cdn.lat.vn/latvps.sh | sudo bash"; exit 1; }
+  host_ready || { ui_msg "Host chưa sẵn sàng (thiếu Docker/proxy).\n\nChạy lệnh cài đặt 1 lần trước:\n  curl -fsSL https://raw.githubusercontent.com/affiliatecmscom/latvps/main/latvps.sh | sudo bash"; exit 1; }
   while true; do
     local c
     c="$(ui_menu "LATVPS — quản lý site" \
