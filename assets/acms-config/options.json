@@ -1,0 +1,537 @@
+{
+ "acms_general_settings": {
+  "default_provider": "crawlbase",
+  "fallback_provider": "none",
+  "cache_duration": 24,
+  "auto_update": true,
+  "default_template": "list",
+  "show_price": false,
+  "show_rating": true,
+  "show_prime_badge": false,
+  "show_stock_status": false,
+  "rating_display_type": "score",
+  "score_label_text": "AI Score",
+  "score_tooltip_text": "AI score rating is a scoring system developed by our experts. The score is from 0 to 10 based on the data collected by the AI tool. This score doesn't impact from any manufacturer or sales agent websites. <a href=\"/affiliate-disclaimer/\" rel=\"nofollow\" target=\"_blank\">Learn more  ›</a>",
+  "show_update": false,
+  "update_tooltip_text": "Last update on {date} / Affiliate links / Images, Product Titles, and Product Highlights from Amazon Product Advertising API.",
+  "enable_utm": false,
+  "utm_source": "",
+  "utm_medium": "affiliate",
+  "open_new_tab": true,
+  "nofollow_links": true,
+  "button_text": "View on Amazon.com",
+  "show_disclosure": true,
+  "disclosure_text": "As an Amazon Associate I earn from qualifying purchases.",
+  "post_disclosure_show": true,
+  "post_disclosure_text": "We independently review everything we recommend. When you buy through our links, we may earn a commission. As an Amazon Associate we earn from qualifying purchases.",
+  "post_disclosure_link_url": "/affiliate-disclaimer/",
+  "post_disclosure_link_text": "Learn more",
+  "post_disclosure_promo1": "",
+  "post_disclosure_promo2": "",
+  "affiliate_tag": "",
+  "custom_url_params": "",
+  "enable_redirect": true,
+  "redirect_slug": "go"
+ },
+ "acms_post_types": {
+  "reviews": {
+   "enabled": false,
+   "slug": "reviews",
+   "menu_name": "Reviews",
+   "singular": "Review",
+   "plural": "Reviews",
+   "icon": "dashicons-star-half"
+  },
+  "deals": {
+   "enabled": false,
+   "slug": "deals",
+   "menu_name": "Deals",
+   "singular": "Deal",
+   "plural": "Deals",
+   "icon": "dashicons-tag"
+  },
+  "guides": {
+   "enabled": false,
+   "slug": "guides",
+   "menu_name": "Guides",
+   "singular": "Guide",
+   "plural": "Guides",
+   "icon": "dashicons-book"
+  }
+ },
+ "acms_content_templates": {
+  "template_1769450119_rb0ebe": {
+   "id": "template_1769450119_rb0ebe",
+   "name": "Demo",
+   "postType": "post",
+   "title": "The %product_count% %KEYWORD% of %year%",
+   "description": "%KEYWORD% of %month_text% %year%: %product_count% models, %review_count% reviews, up to %price_max%.",
+   "metaTitle": "The %product_count% %KEYWORD% of %year%",
+   "metaDescription": "%KEYWORD% of %month_text% %year%: %product_count% models, %review_count% reviews, up to %price_max%.",
+   "beforeProducts": "We provide from %product_min% to %product_max% with %review_count% of %Keyword%, by %month_text% of %year%, including %brand_list%.",
+   "afterProducts": "Have questions about our %KEYWORD% recommendations? Check out our How We Rank page for details on our review process or our Copyright Policy for information on content usage.",
+   "displayType": "list",
+   "createdAt": "2026-01-26 17:55:19",
+   "updatedAt": "2026-03-03 11:50:44"
+  }
+ },
+ "acms_automation": {
+  "cron_enabled": true,
+  "cron_schedule": "every_5_minutes",
+  "rescrape_enabled": false,
+  "rescrape_interval": 24,
+  "worker_count": 12,
+  "rescrape_provider": "default"
+ },
+ "acms_ai_templates": {
+  "tpl_Y5vXD870": {
+   "id": "tpl_Y5vXD870",
+   "name": "Default ASIN Enhancement",
+   "type": "enhance_asin",
+   "provider": "openrouter",
+   "model": "anthropic/claude-haiku-4.5",
+   "prompt": "You are an expert product reviewer and SEO copywriter. Analyze the Amazon product data below and create compelling, SEO-friendly content.\n\n=== PRODUCT DATA ===\nASIN: {{asin_code}}\nTitle: {{asin_title}}\nBrand: {{asin_brand}}\nCategory: {{asin_category}}\nPrice: ${{asin_price}}\nRating: {{asin_rating}}/5 ({{asin_reviews_count}} reviews)\nDescription: {{asin_description}}\nFeatures:\n{{asin_features}}\n\nSpecifications: {{asin_specifications}}\nTop Reviews: {{asin_top_reviews}}\n\n=== YOUR TASK ===\nGenerate enhanced content for this product. Respond in JSON format:\n\n{\n    \"custom_title\": \"An enhanced, SEO-optimized product title (max 150 chars)\",\n    \"short_review\": \"1-2 concise sentences reviewing this product based on the raw data above. State what it is, its standout quality, and who should buy it. Be direct and specific.\",\n    \"search_keyword\": \"A concise search keyword extracted from the product title, suitable for searching on retail sites like Best Buy or Walmart. Use only the essential product identifiers (brand, model, key spec). Use + as word separator.\",\n    \"selling_points\": [\n        \"Enhanced benefit-focused feature 1\",\n        \"Enhanced benefit-focused feature 2\",\n        \"5-7 compelling selling points total\"\n    ],\n    \"pros\": [\n        \"Key advantage 1\",\n        \"Key advantage 2\",\n        \"3-5 pros based on features and reviews\"\n    ],\n    \"cons\": [\n        \"Potential drawback 1\",\n        \"2-3 honest cons to build trust\"\n    ],\n    \"custom_tabs\": [\n        {\"title\": \"Detailed Review\", \"content\": \"HTML_CONTENT_HERE\", \"icon\": \"bi-card-text\"}\n    ]\n}\n\n=== RULES ===\n- custom_tabs: Always include a \"Detailed Review\" tab with icon \"bi-card-text\". The \"content\" value must be valid HTML using p tags. Write 4-5 paragraphs covering: what the product is and who it is for, standout features and real-world performance, design and build quality, any drawbacks, and a final verdict. Each paragraph: 2-3 lines only. Write naturally as for a professional review site. You may add more tabs if the product warrants it (e.g. \"Specifications\", \"Buyer Guide\"). Each tab object: {\"title\": \"string\", \"content\": \"html with p tags\", \"icon\": \"bi-icon-name\"}\n- short_review must be factual and derived from the product data, not generic marketing language\n- search_keyword: Extract brand + model + key specs from title. Use + separator. Keep it short enough to work as a retail search query (typically 5-12 words)\n- Focus on benefits over features\n- Be honest about potential drawbacks\n- Do not include prices or the number of reviews in the written content\n- NEVER use the em-dash character (—) anywhere in any field: not in titles, not in sentences, not in bullet points, not in reviews. Use a comma or rewrite the sentence instead.\n- Respond with valid JSON only, no markdown code fences",
+   "temperature": 0.7,
+   "max_tokens": 4096,
+   "created_at": "2026-02-19 20:42:03",
+   "updated_at": "2026-06-25 14:19:32"
+  },
+  "tpl_1xR52N9r": {
+   "id": "tpl_1xR52N9r",
+   "name": "Default Review Generation",
+   "type": "generate_review",
+   "provider": "openrouter",
+   "model": "anthropic/claude-sonnet-4.6",
+   "prompt": "You are an expert SEO content writer specializing in affiliate product reviews. Write a focused, reader-friendly review article for the keyword below.\n\n## ⚠ CRITICAL: Product Shortcode — NEVER OMIT\nYour \"content\" field MUST contain this EXACT shortcode (copy character-for-character):\n{{shortcode_list}}\n\nWrap it as: <!-- wp:shortcode -->{{shortcode_list}}<!-- /wp:shortcode -->\n\nNever alter any ASIN codes. Never replace them with \"...\" or any placeholder. Omitting or altering this shortcode causes irreversible loss of linked products and will be REJECTED.\n\n---\n\n## Article Information\n- **Keyword**: {{keyword}}\n- **Category**: {{category_name}}\n- **Products Reviewed**: {{products_count}}\n- **Top Brands**: {{brand_list}}\n\n## Products Data\n{{products}}\n\n## Related Posts for Internal Linking\n{{related_posts}}\n\n---\n\n## ABSOLUTE RULES — Violations cause rejection\n\n### 1. Forbidden words — NEVER use anywhere\nThe words **test**, **tested**, and **testing** are completely forbidden in all output fields.\nUse instead: verified, confirmed, evaluated, assessed, reviewed, measured, rated, certified, validated.\n\n### 2. NEVER use %Keyword% or %keyword% tokens in output\nThese tokens must NOT appear anywhere in title, excerpt, content, seo_title, or seo_description.\nWrite the keyword as natural prose using the actual keyword text from Article Information above.\n\n### 3. No em-dash anywhere\nNEVER use the em-dash character (—) in any field. Use a comma, a colon, or rewrite the sentence.\n\n### 4. Double \"best\" trap\nIf the keyword already starts with \"best\" (e.g., \"best sauna blankets\"), NEVER write \"Find the best best sauna blankets\" or \"the best Best Sauna Blankets\". Drop the leading \"best\" from the keyword when the sentence already uses \"best\", \"top\", or \"find the best\".\n\n### 5. No prices anywhere\nNEVER include any dollar amounts, price ranges, or price comparisons in any field: not in the title, not in the excerpt, not in the content body, not in the seo_title, not in the seo_description.\nThis rule exists because Amazon affiliate policy prohibits displaying fixed prices.\nDo NOT write: \"$67\", \"$524\", \"from $90 to $400\", \"under $200\", \"over $500\", or any similar price reference.\n\n### 6. Never show ASIN codes in visible text\nASIN codes (e.g., B0C7KHN2BQ) must NEVER appear in any visible text or anchor text.\nThey belong only inside the shortcode and inside href attributes of Amazon links.\nWRONG: \"the Lunix LX17 (B0C7KHN2BQ) is our top pick\"\nCORRECT: \"the Lunix LX17 is our top pick\"\n\n---\n\n## Writing Rules\n\n### Word Count\n- Target 1200–1800 words total (not counting shortcode wrappers or block comments)\n- Be concise — every sentence must earn its place\n\n### Paragraph Length\n- Every paragraph: 2–3 lines maximum\n- Never write dense, multi-sentence walls of text\n- One idea per paragraph, then move on\n\n### Language & Style\n- Fluent American English with a varied, rich vocabulary\n- Second person (\"you\", \"your\") for recommendations and buying advice\n- First-person plural (\"we\", \"our\") for methodology and credibility sections\n- Be specific — reference actual product names and features from the Products Data\n- Vary sentence length and structure throughout\n- Do not mention prices or number of reviews in the written content\n\n### Dynamic Year\n- Use `%year%` for the current year — NEVER write \"2025\", \"2026\", or any literal year\n- Use `%month_text%` for month references — NEVER write a literal month name\n\n### Internal Links\n- Include 5–7 internal links spread naturally across the article\n- ONLY use URLs from the \"Related Posts\" section above — never invent or guess a URL\n- If fewer than 5 related posts are provided, use as many as available (zero is fine if none exist)\n- Use descriptive, natural anchor text that fits the sentence\n- NEVER use a placeholder token or all-caps keyword as anchor text\n- NEVER use generic anchor text like \"click here\", \"read more\", or \"this article\"\n\n---\n\n## Content Structure (follow this exact order)\n\n**Section 1: Introduction (1–2 paragraphs)**\nOpen with a specific scenario or problem the reader faces. State what this guide covers and who it is for. Add 1 internal link if a relevant URL exists.\n\n**Section 2: Product Comparison Shortcode (REQUIRED)**\n<!-- wp:shortcode -->{{shortcode_list}}<!-- /wp:shortcode -->\n\n**Section 3: Buying Guide (h2 heading)**\nChoose 3–4 key buying criteria specific and practical for this product category. Each criterion: one h3 heading plus 1–2 short paragraphs (2–3 lines each). Add 1–2 internal links naturally here.\n\n**Section 4: Final Thoughts (h2 heading — EXACTLY 1 paragraph)**\nWrite exactly one paragraph of 2–3 lines. Summarize the overall recommendation briefly. Name exactly 2 products from the Products Data above and link each one directly to Amazon:\n- Format: `<a href=\"https://www.amazon.com/dp/ASIN_CODE\">Product Name Only</a>`\n- Example: `<a href=\"https://www.amazon.com/dp/B09PSKN6X3\">Lifepro RejuvaWrap</a>`\n- The anchor text must be the product name ONLY — NEVER include the ASIN code in the visible text or anchor text\n- Pick 2 products that represent different use cases or user needs\n- Keep the tone warm and conclusive — no list, no subheadings, just one flowing paragraph\n\n**Section 5: Frequently Asked Questions (h2 heading)**\nWrite 3–4 FAQs as natural search queries people actually ask about this product type. Each answer: 2–4 sentences. Use `%year%` where the year adds value. Add 1 internal link in one answer if a relevant URL exists.\n\n---\n\n## Gutenberg Block Format — Required for Every Element\n\n- Paragraph: `<!-- wp:paragraph --><p>text</p><!-- /wp:paragraph -->`\n- H2: `<!-- wp:heading --><h2>Heading</h2><!-- /wp:heading -->`\n- H3: `<!-- wp:heading {\"level\":3} --><h3>Heading</h3><!-- /wp:heading -->`\n- Unordered list: `<!-- wp:list --><ul><!-- wp:list-item --><li>Item</li><!-- /wp:list-item --></ul><!-- /wp:list -->`\n- Shortcode: `<!-- wp:shortcode -->{{shortcode_list}}<!-- /wp:shortcode -->`\n\nEvery element must have its block comment wrapper. Never output raw HTML without wrappers.\n\n---\n\n## Response JSON Format\n\nReturn a single valid JSON object — no markdown code fences, no trailing text outside the JSON.\n\n### title\n- Unique, specific title for this exact keyword — no fixed formula\n- Use `%year%` if it adds value\n- Max ~75 characters (count `%year%` as 4 characters)\n- NEVER use em-dash. NEVER use test/tested/testing. NEVER include a price. NEVER use %Keyword%\n\n### excerpt\n- 2 sentences maximum\n- Write naturally and specifically for this keyword\n- Do NOT start with \"Find the best [keyword]\" when keyword already starts with \"best\"\n- NEVER use %Keyword% or %keyword% tokens\n- NEVER mention prices\n- May use `%year%`\n\n### seo_title\n- STRICT MAX 70 characters (count `%year%` as 4 characters when checking length)\n- Different angle from the post title — optimized for click-through rate\n- NEVER use em-dash. NEVER use test/tested/testing. NEVER include a price. NEVER use %Keyword%\n\n### seo_description\n- 140–160 characters\n- MUST include the exact keyword phrase from the Article Information (e.g., \"best sauna blankets\")\n- MUST include `%year%`\n- Do NOT start with \"Find the best [keyword]\" when keyword already starts with \"best\" — instead use \"Shop\", \"Compare\", \"Discover\", \"Explore\", or start mid-sentence\n- NEVER mention prices\n- NEVER use %Keyword% or %keyword% tokens\n- Mention a key benefit or differentiator\n\n### focus_keywords\n- Array of 3–5 keyword variants\n\n### internal_links_used\n- Array of URLs actually used in the content\n\nRespond with valid JSON only.",
+   "temperature": 0.7,
+   "max_tokens": 8192,
+   "created_at": "2026-02-19 20:42:03",
+   "updated_at": "2026-06-25 14:19:32"
+  }
+ },
+ "acms_default_template_id": "template_1769450119_rb0ebe",
+ "acms_ai_default_template_enhance_asin": "tpl_Y5vXD870",
+ "acms_ai_default_template_generate_review": "tpl_1xR52N9r",
+ "acms_ai_provider": "anthropic",
+ "acms_ai_default_model": "openai/gpt-4o-mini",
+ "acms_ai_model": "claude-sonnet-4-6",
+ "acms_ai_selected_models": "{\"openrouter\":[\"google\\/gemini-3-flash-preview\",\"x-ai\\/grok-4.1-fast\",\"meta-llama\\/llama-4-scout\",\"anthropic\\/claude-haiku-4.5\",\"openai\\/o3-mini\",\"meta-llama\\/llama-4-maverick\",\"google\\/gemini-3-pro-preview\",\"anthropic\\/claude-sonnet-4.6\",\"x-ai\\/grok-4\",\"openai\\/gpt-5\",\"deepseek\\/deepseek-v3.2-speciale\",\"x-ai\\/grok-4-heavy\",\"openai\\/gpt-5.2\",\"anthropic\\/claude-opus-4.6\",\"openai\\/o3\",\"deepseek\\/deepseek-v3.2\",\"x-ai\\/grok-4.3\",\"openai\\/gpt-5.4\",\"openai\\/gpt-5.4-mini\",\"openai\\/gpt-5.5\"],\"anthropic\":[]}",
+ "acms_ai_enabled_providers": "{\"openrouter\":true,\"openai\":false,\"anthropic\":false,\"gemini\":false,\"custom\":false}",
+ "acms_ai_enabled": "1",
+ "acms_reviews_category_children": [],
+ "acms_reviews_brand_children": [],
+ "acms_admin_theme": "dark",
+ "rank-math-options-general": {
+  "strip_category_base": "on",
+  "attachment_redirect_urls": "on",
+  "attachment_redirect_default": "https://iflmmo.affiliatecms.com",
+  "nofollow_external_links": "off",
+  "nofollow_image_links": "off",
+  "new_window_external_links": "on",
+  "add_img_alt": "on",
+  "img_alt_format": "%filename%",
+  "add_img_title": "on",
+  "img_title_format": "%title% %count(title)%",
+  "breadcrumbs": "on",
+  "breadcrumbs_separator": "&raquo;",
+  "breadcrumbs_home": "on",
+  "breadcrumbs_home_label": "Home",
+  "breadcrumbs_archive_format": "Archives for %s",
+  "breadcrumbs_search_format": "Results for %s",
+  "breadcrumbs_404_label": "404 Error: page not found",
+  "breadcrumbs_ancestor_categories": "on",
+  "breadcrumbs_blog_page": false,
+  "404_monitor_mode": "simple",
+  "404_monitor_limit": "100",
+  "404_monitor_ignore_query_parameters": "on",
+  "redirections_header_code": "301",
+  "redirections_debug": "off",
+  "console_caching_control": 90,
+  "console_email_reports": true,
+  "console_email_frequency": "monthly",
+  "wc_remove_product_base": false,
+  "wc_remove_category_base": false,
+  "wc_remove_category_parent_slugs": false,
+  "rss_before_content": "",
+  "rss_after_content": "",
+  "wc_remove_generator": true,
+  "remove_shop_snippet_data": true,
+  "frontend_seo_score": "off",
+  "frontend_seo_score_post_types": [
+   "post"
+  ],
+  "frontend_seo_score_position": "top",
+  "setup_mode": "advanced",
+  "content_ai_post_types": [
+   "post",
+   "page"
+  ],
+  "content_ai_country": "all",
+  "content_ai_tone": "Formal",
+  "content_ai_audience": "General Audience",
+  "content_ai_language": "US English",
+  "analytics_stats": true,
+  "toc_block_title": "Table of Contents",
+  "toc_block_list_style": "ul",
+  "llms_post_types": [
+   "post",
+   "page"
+  ],
+  "breadcrumbs_home_link": "https://iflmmo.affiliatecms.com",
+  "breadcrumbs_remove_post_title": "on",
+  "breadcrumbs_hide_taxonomy_name": "off",
+  "headless_support": "off",
+  "frontend_seo_score_template": "circle",
+  "support_rank_math": "on",
+  "404_monitor_exclude": [
+   []
+  ],
+  "redirections_fallback": "default",
+  "redirections_post_redirect": "off",
+  "llms_limit": "50",
+  "update_notification_email": false
+ },
+ "rank-math-options-titles": {
+  "noindex_empty_taxonomies": "on",
+  "title_separator": "-",
+  "capitalize_titles": "off",
+  "twitter_card_type": "summary_large_image",
+  "knowledgegraph_type": "person",
+  "knowledgegraph_name": "Demo",
+  "website_name": "Demo",
+  "local_business_type": "Organization",
+  "local_address_format": "{address} {locality}, {region} {postalcode}",
+  "opening_hours": [
+   {
+    "day": "Monday",
+    "time": "09:00-17:00"
+   },
+   {
+    "day": "Tuesday",
+    "time": "09:00-17:00"
+   },
+   {
+    "day": "Wednesday",
+    "time": "09:00-17:00"
+   },
+   {
+    "day": "Thursday",
+    "time": "09:00-17:00"
+   },
+   {
+    "day": "Friday",
+    "time": "09:00-17:00"
+   },
+   {
+    "day": "Saturday",
+    "time": "09:00-17:00"
+   },
+   {
+    "day": "Sunday",
+    "time": "09:00-17:00"
+   }
+  ],
+  "opening_hours_format": false,
+  "homepage_title": "AffiliateCMS.com: Affiliate Website Demo | Amazon, Impact, CJ, Awin, and More",
+  "homepage_description": "See a live AI affiliate website demo built for Amazon, CJ, Impact, and Awin with automated SEO pages, smart content, and conversion-ready layouts.",
+  "homepage_custom_robots": "off",
+  "disable_author_archives": "off",
+  "url_author_base": "author",
+  "author_custom_robots": "on",
+  "author_robots": [
+   "index"
+  ],
+  "author_archive_title": "%name% %sep% %sitename% %page%",
+  "author_add_meta_box": "on",
+  "disable_date_archives": "on",
+  "date_archive_title": "%date% %page% %sep% %sitename%",
+  "search_title": "%search_query% %page% %sep% %sitename%",
+  "404_title": "Page Not Found %sep% %sitename%",
+  "date_archive_robots": [
+   "noindex"
+  ],
+  "noindex_search": "on",
+  "noindex_archive_subpages": "off",
+  "noindex_password_protected": "off",
+  "pt_download_default_rich_snippet": "product",
+  "author_slack_enhanced_sharing": "on",
+  "pt_post_title": "%title% %sep% %sitename%",
+  "pt_post_description": "%excerpt%",
+  "pt_post_robots": [
+   "index"
+  ],
+  "pt_post_custom_robots": "off",
+  "pt_post_default_rich_snippet": "article",
+  "pt_post_default_article_type": "BlogPosting",
+  "pt_post_default_snippet_name": "%seo_title%",
+  "pt_post_default_snippet_desc": "%seo_description%",
+  "pt_post_slack_enhanced_sharing": "on",
+  "pt_post_ls_use_fk": "titles",
+  "pt_post_add_meta_box": "on",
+  "pt_post_bulk_editing": "editing",
+  "pt_post_link_suggestions": "on",
+  "pt_post_primary_taxonomy": "category",
+  "pt_page_title": "%title% %sep% %sitename%",
+  "pt_page_description": "%excerpt%",
+  "pt_page_robots": [
+   "index"
+  ],
+  "pt_page_custom_robots": "off",
+  "pt_page_default_rich_snippet": "article",
+  "pt_page_default_article_type": "Article",
+  "pt_page_default_snippet_name": "%seo_title%",
+  "pt_page_default_snippet_desc": "%seo_description%",
+  "pt_page_slack_enhanced_sharing": "on",
+  "pt_page_ls_use_fk": "titles",
+  "pt_page_add_meta_box": "on",
+  "pt_page_bulk_editing": "editing",
+  "pt_page_link_suggestions": "on",
+  "pt_attachment_title": "%title% %sep% %sitename%",
+  "pt_attachment_description": "%excerpt%",
+  "pt_attachment_robots": [
+   "noindex"
+  ],
+  "pt_attachment_custom_robots": true,
+  "pt_attachment_default_rich_snippet": false,
+  "pt_attachment_default_article_type": "Article",
+  "pt_attachment_default_snippet_name": "%seo_title%",
+  "pt_attachment_default_snippet_desc": "%seo_description%",
+  "pt_attachment_slack_enhanced_sharing": false,
+  "pt_attachment_add_meta_box": false,
+  "pt_product_title": "%title% %sep% %sitename%",
+  "pt_product_description": "%excerpt%",
+  "pt_product_robots": [
+   "index"
+  ],
+  "pt_product_custom_robots": false,
+  "pt_product_default_rich_snippet": "product",
+  "pt_product_default_article_type": "Article",
+  "pt_product_default_snippet_name": "%seo_title%",
+  "pt_product_default_snippet_desc": "%seo_description%",
+  "pt_product_slack_enhanced_sharing": true,
+  "pt_product_ls_use_fk": "titles",
+  "pt_product_add_meta_box": true,
+  "pt_product_bulk_editing": "editing",
+  "pt_product_link_suggestions": true,
+  "pt_product_primary_taxonomy": "product_cat",
+  "pt_web-story_title": "%title% %sep% %sitename%",
+  "pt_web-story_description": "%excerpt%",
+  "pt_web-story_robots": [
+   "index"
+  ],
+  "pt_web-story_custom_robots": false,
+  "pt_web-story_default_rich_snippet": "article",
+  "pt_web-story_default_article_type": "Article",
+  "pt_web-story_default_snippet_name": "%seo_title%",
+  "pt_web-story_default_snippet_desc": "%seo_description%",
+  "pt_web-story_slack_enhanced_sharing": false,
+  "pt_web-story_add_meta_box": false,
+  "tax_category_title": "%term% %sep% %sitename%",
+  "tax_category_robots": [
+   "index"
+  ],
+  "tax_category_add_meta_box": "on",
+  "tax_category_custom_robots": "off",
+  "tax_category_description": "%term_description%",
+  "tax_category_slack_enhanced_sharing": "on",
+  "tax_category_bulk_editing": "editing",
+  "tax_post_tag_title": "%term% %sep% %sitename%",
+  "tax_post_tag_robots": [
+   "index"
+  ],
+  "tax_post_tag_add_meta_box": "on",
+  "tax_post_tag_custom_robots": "on",
+  "tax_post_tag_description": "%term_description%",
+  "tax_post_tag_slack_enhanced_sharing": "on",
+  "tax_post_tag_bulk_editing": "editing",
+  "remove_product_cat_snippet_data": true,
+  "remove_product_tag_snippet_data": true,
+  "tax_post_format_add_meta_box": true,
+  "robots_global": [
+   "index"
+  ],
+  "advanced_robots_global": {
+   "max-snippet": -1,
+   "max-video-preview": -1,
+   "max-image-preview": "large"
+  },
+  "url": "https://iflmmo.affiliatecms.com",
+  "homepage_robots": [
+   "index"
+  ],
+  "homepage_advanced_robots": {
+   "max-snippet": -1,
+   "max-video-preview": -1,
+   "max-image-preview": "large"
+  },
+  "author_advanced_robots": {
+   "max-snippet": -1,
+   "max-video-preview": -1,
+   "max-image-preview": "large"
+  },
+  "date_advanced_robots": {
+   "max-snippet": -1,
+   "max-video-preview": -1,
+   "max-image-preview": "large"
+  },
+  "noindex_paginated_pages": "off",
+  "pt_post_advanced_robots": {
+   "max-snippet": -1,
+   "max-video-preview": -1,
+   "max-image-preview": "large"
+  },
+  "pt_post_analyze_fields": "",
+  "pt_page_advanced_robots": {
+   "max-snippet": -1,
+   "max-video-preview": -1,
+   "max-image-preview": "large"
+  },
+  "pt_page_analyze_fields": "",
+  "pt_acms_reviews_title": "%title% %page% %sep% %sitename%",
+  "pt_acms_reviews_description": "%excerpt%",
+  "pt_acms_reviews_archive_title": "%title% %page% %sep% %sitename%",
+  "pt_acms_reviews_default_rich_snippet": "",
+  "pt_acms_reviews_default_snippet_name": "%seo_title%",
+  "pt_acms_reviews_default_snippet_desc": "%seo_description%",
+  "pt_acms_reviews_default_article_type": "Article",
+  "pt_acms_reviews_custom_robots": false,
+  "pt_acms_reviews_robots": [
+   "index"
+  ],
+  "pt_acms_reviews_advanced_robots": {
+   "max-snippet": -1,
+   "max-video-preview": -1,
+   "max-image-preview": "large"
+  },
+  "pt_acms_reviews_link_suggestions": true,
+  "pt_acms_reviews_ls_use_fk": "titles",
+  "pt_acms_reviews_primary_taxonomy": "",
+  "pt_acms_reviews_slack_enhanced_sharing": false,
+  "pt_acms_reviews_add_meta_box": true,
+  "pt_acms_reviews_bulk_editing": "editing",
+  "pt_acms_reviews_analyze_fields": "",
+  "tax_category_advanced_robots": {
+   "max-snippet": -1,
+   "max-video-preview": -1,
+   "max-image-preview": "large"
+  },
+  "remove_category_snippet_data": "off",
+  "tax_post_tag_advanced_robots": {
+   "max-snippet": -1,
+   "max-video-preview": -1,
+   "max-image-preview": "large"
+  },
+  "remove_post_tag_snippet_data": "off",
+  "tax_acms_reviews_category_title": "%term% Archives %page% %sep% %sitename%",
+  "tax_acms_reviews_category_description": "%term_description%",
+  "tax_acms_reviews_category_custom_robots": false,
+  "tax_acms_reviews_category_robots": [
+   "index"
+  ],
+  "tax_acms_reviews_category_advanced_robots": {
+   "max-snippet": -1,
+   "max-video-preview": -1,
+   "max-image-preview": "large"
+  },
+  "tax_acms_reviews_category_slack_enhanced_sharing": true,
+  "tax_acms_reviews_category_add_meta_box": true,
+  "tax_acms_reviews_category_bulk_editing": 0,
+  "remove_acms_reviews_category_snippet_data": false,
+  "tax_acms_reviews_brand_title": "%term% Archives %page% %sep% %sitename%",
+  "tax_acms_reviews_brand_description": "%term_description%",
+  "tax_acms_reviews_brand_custom_robots": false,
+  "tax_acms_reviews_brand_robots": [
+   "index"
+  ],
+  "tax_acms_reviews_brand_advanced_robots": {
+   "max-snippet": -1,
+   "max-video-preview": -1,
+   "max-image-preview": "large"
+  },
+  "tax_acms_reviews_brand_slack_enhanced_sharing": true,
+  "tax_acms_reviews_brand_add_meta_box": true,
+  "tax_acms_reviews_brand_bulk_editing": 0,
+  "remove_acms_reviews_brand_snippet_data": false,
+  "tax_acms_reviews_tag_title": "%term% Archives %page% %sep% %sitename%",
+  "tax_acms_reviews_tag_description": "%term_description%",
+  "tax_acms_reviews_tag_custom_robots": false,
+  "tax_acms_reviews_tag_robots": [
+   "index"
+  ],
+  "tax_acms_reviews_tag_advanced_robots": {
+   "max-snippet": -1,
+   "max-video-preview": -1,
+   "max-image-preview": "large"
+  },
+  "tax_acms_reviews_tag_slack_enhanced_sharing": true,
+  "tax_acms_reviews_tag_add_meta_box": false,
+  "tax_acms_reviews_tag_bulk_editing": 0,
+  "remove_acms_reviews_tag_snippet_data": false,
+  "homepage_facebook_title": "AffiliateCMS.com: Affiliate Website Demo | Amazon, Impact, CJ, Awin, and More",
+  "homepage_facebook_description": "See a live AI affiliate website demo built for Amazon, CJ, Impact, and Awin with automated SEO pages, smart content, and conversion-ready layouts.",
+  "homepage_facebook_image": "https://iflmmo.affiliatecms.com/wp-content/uploads/featured-image-demo.jpg",
+  "homepage_facebook_image_id": "100",
+  "website_alternate_name": "Demo",
+  "knowledgegraph_logo": "https://iflmmo.affiliatecms.com/wp-content/uploads/favicon.png",
+  "knowledgegraph_logo_id": "14"
+ },
+ "rank-math-options-sitemap": {
+  "items_per_page": "200",
+  "include_images": "on",
+  "include_featured_image": "off",
+  "exclude_roles": [
+   "contributor",
+   "subscriber"
+  ],
+  "html_sitemap": "off",
+  "html_sitemap_display": "shortcode",
+  "html_sitemap_sort": "published",
+  "html_sitemap_seo_titles": "titles",
+  "authors_sitemap": true,
+  "pt_post_sitemap": "on",
+  "pt_page_sitemap": "on",
+  "pt_attachment_sitemap": "off",
+  "pt_product_sitemap": true,
+  "pt_web-story_sitemap": false,
+  "tax_category_sitemap": "on",
+  "tax_post_tag_sitemap": "on",
+  "html_sitemap_shortcode": "[rank_math_html_sitemap]",
+  "html_sitemap_show_dates": "on",
+  "pt_post_html_sitemap": "on",
+  "pt_page_html_sitemap": "on",
+  "pt_attachment_html_sitemap": "off",
+  "pt_acms_reviews_sitemap": true,
+  "pt_acms_reviews_html_sitemap": false,
+  "tax_category_html_sitemap": "on",
+  "tax_category_include_empty": "off",
+  "tax_post_tag_html_sitemap": "off",
+  "tax_post_tag_include_empty": "off",
+  "tax_acms_reviews_category_sitemap": true,
+  "tax_acms_reviews_category_html_sitemap": false,
+  "tax_acms_reviews_category_include_empty": false,
+  "tax_acms_reviews_brand_sitemap": true,
+  "tax_acms_reviews_brand_html_sitemap": false,
+  "tax_acms_reviews_brand_include_empty": false,
+  "tax_acms_reviews_tag_sitemap": false,
+  "tax_acms_reviews_tag_html_sitemap": false,
+  "tax_acms_reviews_tag_include_empty": false,
+  "exclude_terms": ""
+ },
+ "rank_math_modules": {
+  "0": "link-counter",
+  "1": "analytics",
+  "2": "seo-analysis",
+  "4": "rich-snippet",
+  "5": "woocommerce",
+  "6": "buddypress",
+  "7": "bbpress",
+  "8": "acf",
+  "9": "web-stories",
+  "11": "instant-indexing",
+  "12": "404-monitor",
+  "13": "redirections",
+  "14": "llms-txt",
+  "15": "image-seo",
+  "16": "sitemap"
+ }
+}

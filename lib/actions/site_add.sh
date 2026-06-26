@@ -168,6 +168,9 @@ act_site_add() {
     info "Kích hoạt theme + plugin AffiliateCMS..."
     wp_run "$id" theme activate affiliateCMS-theme >/dev/null 2>&1 || warn "Chưa activate được theme."
     wp_run "$id" plugin activate affiliatecms-pro affiliatecms-ai >/dev/null 2>&1 || warn "Chưa activate được plugin."
+    # Import config giống demo (Rank Math + settings + templates), đã strip license/API/affiliate_tag.
+    info "Import cấu hình giống demo..."
+    acms_import_config "$id"
     if [ -n "$license" ]; then
       wp_run "$id" option update acms_license_key "$license" >/dev/null 2>&1 || true
       license_activate "$license" "$domain" && ok "License đã activate." || warn "Activate license thất bại — xử lý sau trong wp-admin."

@@ -227,6 +227,19 @@ fix_perms() {
   docker exec "${id}_php" chown -R www-data:www-data /var/www/html/wp-content 2>/dev/null || true
 }
 
+# Import config AffiliateCMS + Rank Math (giống demo) vào site. Bundle đã strip license/API/secret.
+# Dùng wp eval + update_option (serialize đúng). Chỉ áp cho site affiliatecms.
+acms_import_config() {
+  local id="$1" f="${WPF_ROOT}/assets/acms-config/options.json"
+  [ -f "$f" ] || { info "Không có config bundle — bỏ qua import (dùng default plugin)."; return 0; }
+  docker cp "$f" "${id}_php:/tmp/acms-config.json" >/dev/null 2>&1 || { warn "Copy config vào container lỗi."; return 1; }
+  wp_run "$id" eval 'foreach((array)json_decode(file_get_contents("/tmp/acms-config.json"),true) as $k=>$v){ update_option($k,$v); }' >/dev/null 2>&1 \
+    && ok "Đã import config (giống demo, không gồm license/API)." || warn "Import config gặp lỗi."
+  # Rank Math: bỏ qua setup wizard
+  wp_run "$id" eval 'update_option("rank_math_is_configured",1); update_option("rank_math_registration_skip",1);' >/dev/null 2>&1 || true
+  docker exec "${id}_php" rm -f /tmp/acms-config.json >/dev/null 2>&1 || true
+}
+
 # Host đã bootstrap chưa? (docker + network + wp-cli).
 host_ready() {
   need_cmd docker && docker network inspect "$PROXY_NET" >/dev/null 2>&1 \
