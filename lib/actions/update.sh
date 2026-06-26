@@ -4,11 +4,11 @@
 
 act_update() {
   require_root
-  ui_yesno "Cập nhật hệ thống sẽ pull image mới (WordPress/MariaDB/Caddy) và khởi động lại từng site.\nNên backup trước. Backup tất cả ngay bây giờ?" && act_backup all
+  ui_yesno "Cập nhật hệ thống sẽ pull image mới (WordPress/MariaDB/nginx/redis) và khởi động lại từng site.\nNên backup trước. Backup tất cả ngay bây giờ?" && act_backup all
 
-  info "Cập nhật Caddy..."
-  docker compose -f "${WPF_ROOT}/caddy/docker-compose.yml" pull -q >/dev/null 2>&1 || true
-  docker compose -f "${WPF_ROOT}/caddy/docker-compose.yml" up -d >/dev/null 2>&1 || warn "Caddy up lỗi."
+  info "Cập nhật front proxy..."
+  proxy_compose pull -q >/dev/null 2>&1 || true
+  proxy_compose up -d >/dev/null 2>&1 || warn "Proxy up lỗi."
 
   local id dir dom done=0 fail=0
   for id in $(list_site_ids); do

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # actions/self_update.sh — tự cập nhật bộ lệnh lat.
 # Ưu tiên git pull (nếu /opt/latvps là git repo); fallback tải tarball.
-# GIỮ nguyên: .license, caddy/.env, caddy/sites/, payload/, /opt/sites (đều ngoài git / gitignore).
+# GIỮ nguyên: .license, proxy/.env, payload/, /opt/sites (đều ngoài git / gitignore).
 
 # Nguồn tarball khi KHÔNG phải git (đặt URL thật khi phát hành):
 LATVPS_TARBALL_URL="${LATVPS_TARBALL_URL:-https://cdn.lat.vn/latvps.tar.gz}"
@@ -47,7 +47,7 @@ act_self_update() {
 
   info "Áp bản mới (giữ license/sites/payload)..."
   rsync -a --delete \
-    --exclude '.license' --exclude 'caddy/.env' --exclude 'caddy/sites/' \
+    --exclude '.license' --exclude 'proxy/.env' \
     --exclude 'payload/' --exclude 'bin/wp-cli.phar' \
     "${newroot}/" "${WPF_ROOT}/"
   chmod +x "${WPF_ROOT}/bin/lat" 2>/dev/null || true

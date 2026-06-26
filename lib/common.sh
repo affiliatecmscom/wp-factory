@@ -187,88 +187,44 @@ resolve_site() {
   site_id_by_domain "$arg"
 }
 
-# wp-cli trong container wp của site: wp_run <id> <args...>
+# wp-cli trong container php của site: wp_run <id> <args...>
 wp_run() {
   local id="$1"; shift
-  docker exec "${id}_wp" php /usr/local/bin/wp-cli.phar --allow-root --path=/var/www/html "$@"
+  docker exec "${id}_php" php /usr/local/bin/wp-cli.phar --allow-root --path=/var/www/html "$@"
 }
 
 # ============================================================
-# Caddy — sinh block theo canonical + reload.
+# Front proxy (nginx-proxy + acme-companion). Routing qua env VIRTUAL_HOST của container _web
+# -> KHÔNG cần file block per-domain. acme-companion tự cấp Let's Encrypt khi có LETSENCRYPT_HOST.
 # ============================================================
+PROXY_DIR="/opt/proxy"
+PROXY_CERTS="${PROXY_DIR}/certs"
 
-# caddy_block <domain> <wp_container> <canonical:www|non-www|none> -> stdout
-caddy_block() {
-  local domain="$1" wp="$2" canonical="$3"
-  printf '# %s (sinh bởi lat)\n' "$domain"
-  case "$canonical" in
-    www)
-      cat <<EOF
-${domain}, www.${domain} {
-	encode zstd gzip
-	@nowww host ${domain}
-	redir @nowww https://www.${domain}{uri} permanent
-	reverse_proxy ${wp}:80
-}
-EOF
-      ;;
-    none)
-      cat <<EOF
-${domain}, www.${domain} {
-	encode zstd gzip
-	reverse_proxy ${wp}:80
-}
-EOF
-      ;;
-    *)  # non-www (mặc định)
-      cat <<EOF
-${domain}, www.${domain} {
-	encode zstd gzip
-	@www host www.${domain}
-	redir @www https://${domain}{uri} permanent
-	reverse_proxy ${wp}:80
-}
-EOF
-      ;;
-  esac
+# docker compose cho stack proxy (LUÔN nạp proxy/.env: ACME_EMAIL).
+proxy_compose() {
+  [ -f "${WPF_ROOT}/proxy/.env" ] || touch "${WPF_ROOT}/proxy/.env"
+  docker compose -f "${WPF_ROOT}/proxy/docker-compose.yml" --env-file "${WPF_ROOT}/proxy/.env" "$@"
 }
 
-# Ghi block ra caddy/sites/<domain>.caddy
-write_caddy_block() {
-  local id="$1" domain="$2" canonical="$3"
-  mkdir -p "${WPF_ROOT}/caddy/sites"
-  caddy_block "$domain" "${id}_wp" "$canonical" > "${WPF_ROOT}/caddy/sites/${domain}.caddy"
+# Lưu Cloudflare Origin Certificate cho 1 domain (nginx-proxy dùng thay vì Let's Encrypt).
+ssl_save_origin() {
+  local domain="$1" cert="$2" key="$3"
+  mkdir -p "$PROXY_CERTS"
+  printf '%s\n' "$cert" > "${PROXY_CERTS}/${domain}.crt"
+  printf '%s\n' "$key"  > "${PROXY_CERTS}/${domain}.key"
+  chmod 600 "${PROXY_CERTS}/${domain}.crt" "${PROXY_CERTS}/${domain}.key"
 }
 
-# docker compose cho stack Caddy, LUÔN nạp caddy/.env (ACME_EMAIL, CF_API_TOKEN).
-caddy_compose() {
-  [ -f "${WPF_ROOT}/caddy/.env" ] || touch "${WPF_ROOT}/caddy/.env"
-  docker compose -f "${WPF_ROOT}/caddy/docker-compose.yml" --env-file "${WPF_ROOT}/caddy/.env" "$@"
+ssl_remove_origin() {
+  local domain="$1"
+  rm -f "${PROXY_CERTS}/${domain}.crt" "${PROXY_CERTS}/${domain}.key"
 }
 
-caddy_reload() {
-  caddy_compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile >/dev/null 2>&1
-}
-
-# Đọc 1 biến từ caddy/.env (vd ACME_EMAIL, CF_API_TOKEN).
-caddy_env_get() {
-  local key="$1" f="${WPF_ROOT}/caddy/.env"
-  [ -f "$f" ] || return 1
-  sed -n "s/^${key}=//p" "$f" | head -n1
-}
-
-# Sinh caddy/Caddyfile. Nếu caddy/.env có CF_API_TOKEN -> thêm acme_dns cloudflare (ACME DNS-01).
-# Dùng nháy đơn để giữ NGUYÊN {$ACME_EMAIL}, {env.CF_API_TOKEN} (placeholder của Caddy, không phải bash).
-write_caddyfile() {
-  local cf; cf="$(caddy_env_get CF_API_TOKEN 2>/dev/null || true)"
-  {
-    printf '# Caddyfile trung tâm LATVPS (sinh bởi lat). KHONG sua tay.\n'
-    printf '{\n'
-    printf '\temail {$ACME_EMAIL}\n'
-    [ -n "$cf" ] && printf '\tacme_dns cloudflare {env.CF_API_TOKEN}\n'
-    printf '}\n\n'
-    printf 'import /etc/caddy/sites/*.caddy\n'
-  } > "${WPF_ROOT}/caddy/Caddyfile"
+# Sửa quyền wp-content để WordPress cài/sửa/xoá plugin+theme + upload media (không đòi FTP).
+# Chạy chown TRONG container php (đúng uid www-data của image).
+fix_perms() {
+  local id="$1"
+  docker exec "${id}_php" chown -R www-data:www-data /var/www/html/wp-content 2>/dev/null || true
 }
 
 # Host đã bootstrap chưa? (docker + network + wp-cli).

@@ -37,7 +37,7 @@ manage_menu() {
   local args=() id dom typ st
   for id in $ids; do
     dom="$(site_get "$id" DOMAIN)"; typ="$(site_get "$id" TYPE)"
-    st="$(docker inspect -f '{{.State.Status}}' "${id}_wp" 2>/dev/null || echo down)"
+    st="$(docker inspect -f '{{.State.Status}}' "${id}_web" 2>/dev/null || echo down)"
     args+=("$id" "${dom}  [${typ}]  ${st}")
   done
   local sel; sel="$(ui_menu "Chọn site để quản lý" "${args[@]}")" || return
@@ -53,20 +53,18 @@ site_submenu() {
     c="$(ui_menu "Site: ${dom} (${id})" \
       1 "Xem thông tin" \
       2 "Đổi domain" \
-      3 "Đổi www / non-www" \
-      4 "Backup site này" \
-      5 "Bật / Tắt site" \
-      6 "Xem logs" \
-      7 "Xoá site" \
+      3 "Backup site này" \
+      4 "Bật / Tắt site" \
+      5 "Xem logs" \
+      6 "Xoá site" \
       0 "Quay lại")" || return
     case "$c" in
       1) ui_msg "$(site_info_text "$id")" ;;
       2) act_site_domain "$id" ;;
-      3) act_site_canonical "$id" ;;
-      4) act_backup "$id"; ui_msg "Đã backup (xem /opt/backups/${id})." ;;
-      5) toggle_site "$id" ;;
-      6) ui_msg "$(act_logs "$id" wp | tail -40)" ;;
-      7) act_site_remove "$id"; return ;;
+      3) act_backup "$id"; ui_msg "Đã backup (xem /opt/backups/${id})." ;;
+      4) toggle_site "$id" ;;
+      5) ui_msg "$(act_logs "$id" php | tail -40)" ;;
+      6) act_site_remove "$id"; return ;;
       0|"") return ;;
     esac
   done
@@ -74,7 +72,7 @@ site_submenu() {
 
 toggle_site() {
   local id="$1" dir; dir="$(site_dir "$id")"
-  local st; st="$(docker inspect -f '{{.State.Status}}' "${id}_wp" 2>/dev/null || echo down)"
+  local st; st="$(docker inspect -f '{{.State.Status}}' "${id}_web" 2>/dev/null || echo down)"
   if [ "$st" = "running" ]; then
     docker compose -f "$dir/docker-compose.yml" --env-file "$dir/.env" stop >/dev/null 2>&1
     ui_msg "Đã TẮT site (dữ liệu giữ nguyên)."
@@ -88,18 +86,16 @@ maintenance_menu() {
   while true; do
     local c
     c="$(ui_menu "Bảo trì / nâng cao" \
-      1 "Cập nhật hệ thống (image WP/MariaDB/Caddy + OS) [lat upgrade]" \
+      1 "Cập nhật hệ thống (image WP/MariaDB/nginx + OS) [lat upgrade]" \
       2 "Cập nhật lệnh lat (code) [lat update]" \
       3 "Cập nhật plugin payload (cho site tạo sau)" \
-      4 "Cloudflare DNS (bật proxy thoải mái)" \
-      5 "Chạy lại setup host (idempotent)" \
+      4 "Chạy lại setup host (idempotent)" \
       0 "Quay lại")" || return
     case "$c" in
       1) act_update ;;
       2) act_self_update ;;
       3) act_payload_sync; ui_msg "Payload đã cập nhật." ;;
-      4) act_cloudflare ;;
-      5) act_setup ;;
+      4) act_setup ;;
       0|"") return ;;
     esac
   done

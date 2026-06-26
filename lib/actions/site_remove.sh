@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# actions/site_remove.sh — gỡ sạch 1 site (container + volume + dir + caddy block + license slot).
+# actions/site_remove.sh — gỡ sạch 1 site (container + volume + dir + origin cert + license slot).
 
 act_site_remove() {
   require_root
@@ -24,9 +24,8 @@ act_site_remove() {
   info "Tắt + xoá container/volume..."
   docker compose -f "$dir/docker-compose.yml" --env-file "$dir/.env" down -v >/dev/null 2>&1 || warn "compose down lỗi."
 
-  info "Xoá Caddy block + reload..."
-  rm -f "${WPF_ROOT}/caddy/sites/${domain}.caddy"
-  caddy_reload || true
+  # Xoá origin cert (nếu có); nginx-proxy tự bỏ route khi container _web mất.
+  ssl_remove_origin "$domain"; ssl_remove_origin "www.${domain}"
 
   rm -rf "$dir"
   ok "Đã gỡ site ${domain}."

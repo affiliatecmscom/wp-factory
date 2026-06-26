@@ -10,7 +10,8 @@ act_site_domain() {
 
   local old; old="$(site_get "$id" DOMAIN)"
   local type; type="$(site_get "$id" TYPE)"
-  local canonical; canonical="$(site_get "$id" CANONICAL)"
+  local ssl; ssl="$(site_get "$id" SSL)"
+  local dir; dir="$(site_dir "$id")"
 
   # Nhập domain mới nếu thiếu
   while true; do
@@ -40,14 +41,30 @@ act_site_domain() {
     fi
   fi
 
-  # 3. Caddy: thay block
-  info "Cập nhật Caddy..."
-  rm -f "${WPF_ROOT}/caddy/sites/${old}.caddy"
-  write_caddy_block "$id" "$new" "$canonical"
-  caddy_reload || warn "Caddy reload lỗi."
+  # 3. Routing + SSL: đổi VIRTUAL_HOST/LE_HOST trong .env rồi recreate container _web
+  info "Cập nhật proxy + SSL..."
+  ssl_remove_origin "$old"; ssl_remove_origin "www.${old}"
+  local le_host=""
+  if [ "$ssl" = "auto" ]; then
+    le_host="${new},www.${new}"
+  else
+    ui_msg "SSL origin: cần Cloudflare Origin Cert MỚI cho ${new}."
+    local cert key
+    cert="$(ui_input "Dán CERTIFICATE cho ${new}:" "")" || true
+    key="$(ui_input "Dán PRIVATE KEY:" "")" || true
+    if printf '%s' "$cert" | grep -q 'BEGIN CERTIFICATE'; then
+      ssl_save_origin "$new" "$cert" "$key"; ssl_save_origin "www.${new}" "$cert" "$key"
+    else
+      warn "Bỏ qua cert — thả cert vào /opt/proxy/certs/${new}.crt|.key sau."
+    fi
+  fi
+  sed -i "s|^VIRTUAL_HOST=.*|VIRTUAL_HOST=${new},www.${new}|" "$dir/.env"
+  sed -i "s|^LE_HOST=.*|LE_HOST=${le_host}|" "$dir/.env"
+  docker compose -f "$dir/docker-compose.yml" --env-file "$dir/.env" up -d --force-recreate web >/dev/null 2>&1 \
+    || warn "Recreate web lỗi — kiểm 'lat logs ${id} web'."
 
   # 4. site.conf
   site_set "$id" DOMAIN "$new"
 
-  ui_msg "Đã đổi domain: ${old} -> ${new}\n\n>> Nhớ trỏ A record '${new}' (và www nếu dùng) về IP VPS này.\n>> Cert mới sẽ được cấp khi domain trỏ đúng."
+  ui_msg "Đã đổi domain: ${old} -> ${new}\n\n>> Nhớ trỏ A record '${new}' (và www) về IP VPS này.\n>> SSL ${ssl}: cert sẽ được cấp/áp khi domain trỏ đúng."
 }

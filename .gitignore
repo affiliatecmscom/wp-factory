@@ -1,12 +1,9 @@
 # Bí mật + dữ liệu runtime — KHÔNG commit.
 .license
-caddy/.env
-caddy/sites/*.caddy
-caddy/Caddyfile
+proxy/.env
 bin/wp-cli.phar
 
-# Payload là bản copy plugin/theme (sinh bởi sync-payload.sh) — không track,
-# tránh phình repo + lệch nguồn. Build lại bằng: bash sync-payload.sh
+# Payload (plugin/theme) tải từ app.lat.vn gated license — không track.
 payload/plugins/
 payload/themes/
 payload/mu-plugins/
