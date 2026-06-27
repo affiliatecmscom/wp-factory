@@ -59,13 +59,23 @@ render_template() {
 
 # Chờ MariaDB của 1 site sẵn sàng (truyền tên container db).
 wait_for_db() {
-  local db_container="$1" tries="${2:-60}"
+  local db_container="$1" db_pass="$2" tries="${3:-60}"
   info "Chờ database '${db_container}' sẵn sàng..."
   for i in $(seq 1 "$tries"); do
-    if docker exec "$db_container" mariadb-admin ping -uroot --silent >/dev/null 2>&1 \
-       || docker exec "$db_container" sh -c 'mariadb-admin ping --silent' >/dev/null 2>&1; then
-      ok "Database sẵn sàng."
-      return 0
+    # Ép TCP (-h127.0.0.1) + user 'wordpress': chỉ thành công khi server THẬT đã mở mạng
+    # và user/DB đã tạo xong. Tránh false-positive của server tạm (socket-only) lúc init.
+    if [ -n "$db_pass" ]; then
+      if docker exec -e MYSQL_PWD="$db_pass" "$db_container" \
+           mariadb -h127.0.0.1 -uwordpress wordpress -e 'SELECT 1' >/dev/null 2>&1; then
+        ok "Database sẵn sàng."
+        return 0
+      fi
+    else
+      # vanilla/không pass: vẫn ép TCP để chắc server thật đã lên.
+      if docker exec "$db_container" sh -c 'mariadb-admin ping -h127.0.0.1 --silent' >/dev/null 2>&1; then
+        ok "Database sẵn sàng."
+        return 0
+      fi
     fi
     sleep 2
   done

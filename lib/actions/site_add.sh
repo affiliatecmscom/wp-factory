@@ -145,7 +145,7 @@ act_site_add() {
 
   info "Khởi động container (nginx + php-fpm + mariadb + redis)..."
   docker compose -f "$dir/docker-compose.yml" --env-file "$dir/.env" up -d || { _add_rollback; return 1; }
-  wait_for_db "$db" || { _add_rollback; return 1; }
+  wait_for_db "$db" "$db_password" || { _add_rollback; return 1; }
 
   docker cp "${WPF_ROOT}/bin/wp-cli.phar" "${php}:/usr/local/bin/wp-cli.phar" >/dev/null 2>&1
 
