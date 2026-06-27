@@ -65,5 +65,21 @@ ui_msg() {
   fi
 }
 
+# ui_paste_block "PROMPT" "END_REGEX" -> đọc khối NHIỀU DÒNG từ tty (cho dán cert/key PEM),
+# dừng khi gặp dòng khớp END_REGEX (gồm cả dòng đó). In khối ra stdout.
+# Lý do không dùng inputbox whiptail: inputbox 1 dòng, dán PEM nhiều dòng bị submit sớm -> hỏng.
+ui_paste_block() {
+  local prompt="$1" endre="$2" line buf=""
+  # Thoát hẳn TUI: hướng dẫn in ra stderr, đọc thô từ /dev/tty theo dòng.
+  printf '\n----------------------------------------\n' >&2
+  printf '%s\n' "$prompt" >&2
+  printf '(Dán nguyên khối; tự kết thúc khi gặp dòng END.)\n' >&2
+  while IFS= read -r line </dev/tty; do
+    buf+="$line"$'\n'
+    [[ "$line" =~ $endre ]] && break
+  done
+  printf '%s' "$buf"
+}
+
 # ui_gauge_msg "TEXT" - thông báo tiến trình ngắn (không chặn). Dùng info() là đủ; alias cho rõ nghĩa.
 ui_note() { info "$@"; }

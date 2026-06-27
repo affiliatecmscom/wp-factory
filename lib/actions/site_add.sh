@@ -62,11 +62,11 @@ act_site_add() {
 
   local cert="" key=""
   if [ "$ssl" = "origin" ]; then
-    ui_msg "Tạo Cloudflare Origin Certificate:\nCloudflare > SSL/TLS > Origin Server > Create Certificate\n(phủ ${domain} và *.${domain}). Copy phần CERTIFICATE và PRIVATE KEY."
-    cert="$(ui_input "Dán nội dung CERTIFICATE (-----BEGIN CERTIFICATE-----...):" "")" || return 1
-    key="$(ui_input "Dán nội dung PRIVATE KEY (-----BEGIN PRIVATE KEY-----...):" "")" || return 1
-    if ! printf '%s' "$cert" | grep -q 'BEGIN CERTIFICATE' || ! printf '%s' "$key" | grep -q 'BEGIN'; then
-      ui_msg "Cert/key không hợp lệ. Huỷ."; return 1
+    ui_msg "Tạo Cloudflare Origin Certificate:\nCloudflare > SSL/TLS > Origin Server > Create Certificate\n(phủ ${domain} và *.${domain}). Copy phần CERTIFICATE và PRIVATE KEY.\n\nỞ 2 bước sau, dán NGUYÊN khối nhiều dòng (gồm cả dòng BEGIN/END)."
+    cert="$(ui_paste_block "Dán CERTIFICATE (cả -----BEGIN CERTIFICATE----- ... -----END CERTIFICATE-----):" 'END CERTIFICATE')"
+    key="$(ui_paste_block "Dán PRIVATE KEY (cả -----BEGIN ... PRIVATE KEY----- ... -----END ... PRIVATE KEY-----):" 'END.*PRIVATE KEY')"
+    if ! printf '%s' "$cert" | grep -q 'BEGIN CERTIFICATE' || ! printf '%s' "$key" | grep -q 'BEGIN.*PRIVATE KEY'; then
+      ui_msg "Cert/key không hợp lệ (thiếu dòng BEGIN). Huỷ."; return 1
     fi
   fi
 
