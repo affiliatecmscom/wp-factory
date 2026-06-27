@@ -25,11 +25,13 @@ act_site_domain() {
 
   ui_yesno "Đổi domain site ${id}:\n${old}  ->  ${new}\n\nDữ liệu (bài viết, DB) giữ nguyên. Tiếp tục?" || { info "Đã huỷ."; return 1; }
 
-  # 1. WP: search-replace + update url
+  # 1. WP: search-replace + update url (giữ canonical www/non-www đã chọn lúc tạo)
+  local canon; canon="$(site_get "$id" CANONICAL 2>/dev/null)"
+  local new_canon="$new"; [ "$canon" = "www" ] && new_canon="www.${new}"
   info "Cập nhật URL trong WordPress (search-replace)..."
   wp_run "$id" search-replace "$old" "$new" --all-tables --skip-columns=guid >/dev/null 2>&1 || warn "search-replace gặp lỗi (kiểm tra DB)."
-  wp_run "$id" option update home "https://${new}" >/dev/null 2>&1 || true
-  wp_run "$id" option update siteurl "https://${new}" >/dev/null 2>&1 || true
+  wp_run "$id" option update home "https://${new_canon}" >/dev/null 2>&1 || true
+  wp_run "$id" option update siteurl "https://${new_canon}" >/dev/null 2>&1 || true
 
   # 2. License: chuyển domain
   if [ "$type" = "affiliatecms" ]; then

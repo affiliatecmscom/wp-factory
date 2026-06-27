@@ -71,11 +71,18 @@ act_site_add() {
     fi
   fi
 
-  # --- Bước 4: email ---
+  # --- Bước 4: domain chính (www / non-www). Bên còn lại tự 301 về (WP redirect_canonical). ---
+  local canon canon_host
+  canon="$(ui_menu "Domain chính (chuẩn SEO; bên kia tự chuyển 301 về đây)" \
+    non-www "${domain} (không www) [khuyến nghị]" \
+    www     "www.${domain}")" || return 1
+  [ "$canon" = "www" ] && canon_host="www.${domain}" || canon_host="${domain}"
+
+  # --- Bước 5: email ---
   [ -n "$email" ] || email="$(ui_input "Email admin WordPress:" "admin@${domain}")" || return 1
 
-  # --- Bước 5: xác nhận ---
-  ui_yesno "Tạo site?\n\nDomain : ${domain}\nLoại   : ${type}\nSSL    : ${ssl}\nEmail  : ${email}" || { info "Đã huỷ."; return 1; }
+  # --- Bước 6: xác nhận ---
+  ui_yesno "Tạo site?\n\nDomain chính : https://${canon_host}\nLoại         : ${type}\nSSL          : ${ssl}\nEmail        : ${email}" || { info "Đã huỷ."; return 1; }
 
   # --- Bước 6: tiến hành ---
   local id; id="$(new_site_id)"
@@ -121,6 +128,7 @@ act_site_add() {
   site_set "$id" STACK "wordpress"
   site_set "$id" TYPE "$type"
   site_set "$id" SSL "$ssl"
+  site_set "$id" CANONICAL "$canon"
   site_set "$id" DB "mariadb"
   site_set "$id" REDIS "yes"
   site_set "$id" ADMIN_EMAIL "$email"
@@ -162,7 +170,7 @@ act_site_add() {
   local admin_user="admin" admin_pass; admin_pass="$(rand_pass 10)"
   if ! wp_run "$id" core is-installed >/dev/null 2>&1; then
     info "Cài WordPress..."
-    wp_run "$id" core install --url="https://${domain}" --title="${domain}" \
+    wp_run "$id" core install --url="https://${canon_host}" --title="${domain}" \
       --admin_user="$admin_user" --admin_password="$admin_pass" \
       --admin_email="$email" --skip-email || { _add_rollback; return 1; }
   fi
@@ -199,7 +207,7 @@ act_site_add() {
     fi
     # Nội dung mẫu giống demo (mặc định Có). Cần internet để tải ảnh từ demo.
     if ui_yesno "Import nội dung mẫu giống demo (22 bài, 6 trang, menu, ảnh)?" yes; then
-      acms_import_demo_content "$id" "$domain"
+      acms_import_demo_content "$id" "$canon_host"
     else
       info "Bỏ qua nội dung demo - site bắt đầu trống."
     fi
@@ -212,5 +220,6 @@ act_site_add() {
   [ "$ssl" = "origin" ] && ssl_note="Đã dùng Cloudflare Origin Cert. Bật proxy (cam) + SSL/TLS = Full (strict)."
   [ "$ssl" = "cloudflare" ] && ssl_note="Đã tạo cert tự ký. Bật Cloudflare proxy (CAM) + đặt SSL/TLS = Full (KHÔNG phải strict)."
 
-  ui_msg "Site đã sẵn sàng: https://${domain}\n\nWP Admin : https://${domain}/wp-admin\nUser     : ${admin_user}\nPassword : ${admin_pass}\nLoại     : ${type}\nSSL      : ${ssl}\nThư mục  : ${SITES_ROOT}/${domain}  (-> ${dir})\n\n>> Trỏ A record '${domain}' (và www) về IP VPS này.\n>> ${ssl_note}\n>> Search engine: ĐANG CHẶN index (chống trùng lặp). Khi chạy thật: Settings > Reading, bỏ tick 'Discourage search engines'.\n>> Lưu lại mật khẩu trên (sẽ không hiện lại)."
+  local other_host="www.${domain}"; [ "$canon" = "www" ] && other_host="${domain}"
+  ui_msg "Site đã sẵn sàng: https://${canon_host}\n\nWP Admin : https://${canon_host}/wp-admin\nUser     : ${admin_user}\nPassword : ${admin_pass}\nLoại     : ${type}\nSSL      : ${ssl}\nThư mục  : ${SITES_ROOT}/${domain}  (-> ${dir})\n\n>> Trỏ A record '${domain}' (và www) về IP VPS này.\n>> ${ssl_note}\n>> Domain chính: ${canon_host} (https://${other_host} tự 301 về domain chính).\n>> Search engine: ĐANG CHẶN index (chống trùng lặp). Khi chạy thật: Settings > Reading, bỏ tick 'Discourage search engines'.\n>> Lưu lại mật khẩu trên (sẽ không hiện lại)."
 }
