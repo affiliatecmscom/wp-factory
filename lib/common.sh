@@ -171,13 +171,26 @@ site_set() {
   fi
 }
 
-# Liệt kê mọi site id (thư mục có site.conf).
+# Liệt kê mọi site id (thư mục THẬT có site.conf). Bỏ qua symlink domain (tránh đếm trùng).
 list_site_ids() {
   [ -d "$SITES_ROOT" ] || return 0
   local d
   for d in "$SITES_ROOT"/*/; do
+    [ -L "${d%/}" ] && continue
     [ -f "${d}site.conf" ] && basename "$d"
   done
+}
+
+# Symlink thân thiện /opt/sites/<domain> -> /opt/sites/<id> (để cd theo tên domain).
+# Thư mục THẬT vẫn là <id> (bất biến) -> đổi domain chỉ đổi symlink, container giữ nguyên.
+site_link_set() {
+  local id="$1" domain="$2"
+  [ -n "$domain" ] || return 0
+  ln -sfn "$(site_dir "$id")" "${SITES_ROOT}/${domain}" 2>/dev/null || true
+}
+site_link_remove() {
+  local domain="$1"
+  [ -n "$domain" ] && [ -L "${SITES_ROOT}/${domain}" ] && rm -f "${SITES_ROOT}/${domain}" || true
 }
 
 # Tìm id theo domain.

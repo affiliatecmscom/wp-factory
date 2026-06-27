@@ -27,6 +27,7 @@ act_site_remove() {
   # Xoá origin cert (nếu có); nginx-proxy tự bỏ route khi container _web mất.
   ssl_remove_origin "$domain"; ssl_remove_origin "www.${domain}"
 
+  site_link_remove "$domain"
   rm -rf "$dir"
   ok "Đã gỡ site ${domain}."
 }

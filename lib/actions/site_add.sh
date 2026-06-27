@@ -87,6 +87,7 @@ act_site_add() {
     warn "Lỗi khi tạo site - dọn dẹp..."
     docker compose -f "$dir/docker-compose.yml" --env-file "$dir/.env" down -v >/dev/null 2>&1 || true
     rm -rf "$dir"
+    site_link_remove "$domain"
     ssl_remove_origin "$domain"; ssl_remove_origin "www.${domain}"
   }
 
@@ -124,6 +125,7 @@ act_site_add() {
   site_set "$id" REDIS "yes"
   site_set "$id" ADMIN_EMAIL "$email"
   [ "$type" = "affiliatecms" ] && site_set "$id" LICENSE_KEY "$license"
+  site_link_set "$id" "$domain"   # /opt/sites/<domain> -> /opt/sites/<id>
 
   # mu-plugin proxy-ssl (WP sau proxy nhận biết HTTPS)
   mkdir -p "$dir/wp-content/mu-plugins"
@@ -190,5 +192,5 @@ act_site_add() {
   [ "$ssl" = "origin" ] && ssl_note="Đã dùng Cloudflare Origin Cert. Bật proxy (cam) + SSL/TLS = Full (strict)."
   [ "$ssl" = "cloudflare" ] && ssl_note="Đã tạo cert tự ký. Bật Cloudflare proxy (CAM) + đặt SSL/TLS = Full (KHÔNG phải strict)."
 
-  ui_msg "Site đã sẵn sàng: https://${domain}\n\nWP Admin : https://${domain}/wp-admin\nUser     : ${admin_user}\nPassword : ${admin_pass}\nLoại     : ${type}\nSSL      : ${ssl}\nThư mục  : ${dir}\n\n>> Trỏ A record '${domain}' (và www) về IP VPS này.\n>> ${ssl_note}\n>> Lưu lại mật khẩu trên (sẽ không hiện lại)."
+  ui_msg "Site đã sẵn sàng: https://${domain}\n\nWP Admin : https://${domain}/wp-admin\nUser     : ${admin_user}\nPassword : ${admin_pass}\nLoại     : ${type}\nSSL      : ${ssl}\nThư mục  : ${SITES_ROOT}/${domain}  (-> ${dir})\n\n>> Trỏ A record '${domain}' (và www) về IP VPS này.\n>> ${ssl_note}\n>> Lưu lại mật khẩu trên (sẽ không hiện lại)."
 }

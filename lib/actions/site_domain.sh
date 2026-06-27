@@ -45,26 +45,34 @@ act_site_domain() {
   info "Cập nhật proxy + SSL..."
   ssl_remove_origin "$old"; ssl_remove_origin "www.${old}"
   local le_host=""
-  if [ "$ssl" = "auto" ]; then
-    le_host="${new},www.${new}"
-  else
-    ui_msg "SSL origin: cần Cloudflare Origin Cert MỚI cho ${new}."
-    local cert key
-    cert="$(ui_input "Dán CERTIFICATE cho ${new}:" "")" || true
-    key="$(ui_input "Dán PRIVATE KEY:" "")" || true
-    if printf '%s' "$cert" | grep -q 'BEGIN CERTIFICATE'; then
-      ssl_save_origin "$new" "$cert" "$key"; ssl_save_origin "www.${new}" "$cert" "$key"
-    else
-      warn "Bỏ qua cert - thả cert vào /opt/proxy/certs/${new}.crt|.key sau."
-    fi
-  fi
+  case "$ssl" in
+    auto)
+      le_host="${new},www.${new}"
+      ;;
+    cloudflare)
+      ssl_make_selfsigned "$new" && ok "Đã tạo cert tự ký cho ${new}." || warn "Tạo cert tự ký lỗi."
+      ;;
+    origin)
+      ui_msg "SSL origin: cần Cloudflare Origin Cert MỚI cho ${new}.\nDán nguyên khối (tự dừng ở dòng END)."
+      local cert key
+      cert="$(ui_paste_block "Dán CERTIFICATE cho ${new}:" 'END CERTIFICATE')"
+      key="$(ui_paste_block "Dán PRIVATE KEY cho ${new}:" 'END.*PRIVATE KEY')"
+      if printf '%s' "$cert" | grep -q 'BEGIN CERTIFICATE'; then
+        ssl_save_origin "$new" "$cert" "$key"; ssl_save_origin "www.${new}" "$cert" "$key"
+      else
+        warn "Bỏ qua cert - thả cert vào /opt/proxy/certs/${new}.crt|.key sau."
+      fi
+      ;;
+  esac
   sed -i "s|^VIRTUAL_HOST=.*|VIRTUAL_HOST=${new},www.${new}|" "$dir/.env"
   sed -i "s|^LE_HOST=.*|LE_HOST=${le_host}|" "$dir/.env"
   docker compose -f "$dir/docker-compose.yml" --env-file "$dir/.env" up -d --force-recreate web >/dev/null 2>&1 \
     || warn "Recreate web lỗi - kiểm 'lat logs ${id} web'."
 
-  # 4. site.conf
+  # 4. site.conf + symlink domain (/opt/sites/<domain>)
   site_set "$id" DOMAIN "$new"
+  site_link_remove "$old"
+  site_link_set "$id" "$new"
 
-  ui_msg "Đã đổi domain: ${old} -> ${new}\n\n>> Nhớ trỏ A record '${new}' (và www) về IP VPS này.\n>> SSL ${ssl}: cert sẽ được cấp/áp khi domain trỏ đúng."
+  ui_msg "Đã đổi domain: ${old} -> ${new}\n\nThư mục: ${SITES_ROOT}/${new}  (-> $(site_dir "$id"))\n>> Nhớ trỏ A record '${new}' (và www) về IP VPS này.\n>> SSL ${ssl}: cert sẽ được cấp/áp khi domain trỏ đúng."
 }
