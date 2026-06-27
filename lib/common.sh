@@ -327,16 +327,22 @@ acms_import_demo_content() {
   [ -n "$demo_host" ] || demo_host="iflmmo.affiliatecms.com"
   rm -rf "$ex"
 
-  # Dump bỏ data wp_users -> tạo lại admin. LƯU Ý: structure dump giữ AUTO_INCREMENT cũ nên
-  # admin mới KHÔNG chắc là ID 1 -> phải GÁN LẠI tác giả mọi bài cho admin mới (tránh mất author).
+  # Dump bỏ data wp_users NHƯNG structure giữ AUTO_INCREMENT cũ (=4) -> admin mới sẽ là ID 4,
+  # trong khi MỌI bài demo author = ID 1 -> mất tác giả. Fix CHẮC CHẮN: reset AUTO_INCREMENT=1
+  # để admin mới = ID 1 (đúng author demo). Vẫn reassign như lưới phụ.
   info "Tạo tài khoản admin..."
+  # Reset AUTO_INCREMENT=1 -> admin mới = ID 1 = đúng author của mọi bài demo (giữ tác giả).
+  docker exec "${id}_db" mariadb -uwordpress -p"$db_pass" wordpress \
+    -e "ALTER TABLE wp_users AUTO_INCREMENT=1;" >/dev/null 2>&1 || true
   local admin_id
   admin_id="$(wp_run "$id" user create "$admin_user" "$admin_email" --role=administrator --user_pass="$admin_pass" --porcelain 2>/dev/null | tr -d '[:space:]')"
   printf '%s' "$admin_id" | grep -qE '^[0-9]+$' \
     || admin_id="$(wp_run "$id" user list --role=administrator --field=ID 2>/dev/null | head -1 | tr -d '[:space:]')"
   if printf '%s' "$admin_id" | grep -qE '^[0-9]+$'; then
-    wp_run "$id" eval 'global $wpdb; $wpdb->query("UPDATE {$wpdb->posts} SET post_author='"$admin_id"' WHERE post_author > 0");' >/dev/null 2>&1 || true
-    ok "Admin (ID ${admin_id}) + gán lại tác giả bài viết."
+    # Lưới phụ (phòng admin_id != 1): gán lại tác giả mọi bài/trang về admin bằng SQL trực tiếp.
+    docker exec "${id}_db" mariadb -uwordpress -p"$db_pass" wordpress \
+      -e "UPDATE wp_posts SET post_author=${admin_id} WHERE post_author>0;" >/dev/null 2>&1 || true
+    ok "Admin (ID ${admin_id}) + tác giả bài viết đã gán."
   else
     warn "Không tạo được admin sau clone - kiểm tra wp-admin."
   fi
