@@ -39,10 +39,15 @@ ui_input() {
 }
 
 # ui_yesno "MSG" -> return 0 nếu Yes, 1 nếu No.
+# Dùng --menu (không dùng --yesno) vì: (1) một số terminal không vẽ được nút Yes/No
+# của newt -> box trống, kẹt; (2) menu điều hướng bằng phím mũi tên - tự nhiên hơn.
 ui_yesno() {
   local msg="$1"
   if [ "$HAS_WHIPTAIL" = 1 ]; then
-    whiptail --title "lat" --yesno "$msg" 12 74
+    local ans
+    ans="$(whiptail --title "lat" --notags --menu "$msg" 18 74 2 \
+      yes "Có" no "Không" 3>&1 1>&2 2>&3)" || return 1
+    [ "$ans" = "yes" ]
     return $?
   fi
   printf '%s [y/N]: ' "$msg" >&2
