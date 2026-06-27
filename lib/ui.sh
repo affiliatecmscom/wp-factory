@@ -60,19 +60,19 @@ ui_input() {
 # ui_yesno "MSG" -> return 0 nếu Yes, 1 nếu No.
 # Dùng --menu (không dùng --yesno) vì: (1) một số terminal không vẽ được nút Yes/No
 # của newt -> box trống, kẹt; (2) menu điều hướng bằng phím mũi tên - tự nhiên hơn.
+# ui_yesno "MSG" [default]  -> return 0 nếu Yes, 1 nếu No.
+# default="yes" -> Enter = Yes (gợi ý [Y/n]); mặc định "no" -> Enter = No ([y/N]).
 ui_yesno() {
-  local msg="$1"
-  if [ "$HAS_WHIPTAIL" = 1 ]; then
-    local ans
-    ans="$(whiptail --title "lat" --notags --menu "$msg" 18 74 2 \
-      yes "Có" no "Không" 3>&1 1>&2 2>&3)" || return 1
-    [ "$ans" = "yes" ]
-    return $?
-  fi
+  local msg="$1" def="${2:-no}"
+  local hint='[y/N]'; [ "$def" = "yes" ] && hint='[Y/n]'
   printf '%b' "$msg" >&2
-  printf ' [y/N]: ' >&2
+  printf ' %s: ' "$hint" >&2
   local a; read -r a </dev/tty || return 1
-  case "$a" in [Yy]*) return 0;; *) return 1;; esac
+  if [ "$def" = "yes" ]; then
+    case "$a" in [Nn]*) return 1;; *) return 0;; esac
+  else
+    case "$a" in [Yy]*) return 0;; *) return 1;; esac
+  fi
 }
 
 # ui_msg "TEXT" -> hiện thông báo.

@@ -281,6 +281,32 @@ acms_import_config() {
   docker exec "${id}_php" rm -f /tmp/acms-config.json >/dev/null 2>&1 || true
 }
 
+# Import NỘI DUNG demo (bài/trang/danh mục/menu/ảnh) từ file WXR bundle -> giống hệt demo.
+# Ảnh: WordPress Importer tự tải từ URL demo (public) + remap về site mới. Cần internet.
+acms_import_demo_content() {
+  local id="$1" new_domain="$2" wxr="${WPF_ROOT}/assets/demo-content.xml"
+  [ -f "$wxr" ] || { warn "Không có assets/demo-content.xml - bỏ qua."; return 1; }
+  info "Cài WordPress Importer..."
+  wp_run "$id" plugin install wordpress-importer --activate >/dev/null 2>&1 \
+    || { warn "Cài wordpress-importer lỗi (kiểm mạng) - bỏ qua import demo."; return 1; }
+  docker cp "$wxr" "${id}_php:/tmp/demo-content.xml" >/dev/null 2>&1 \
+    || { warn "Copy WXR vào container lỗi."; return 1; }
+  info "Import nội dung demo (bài, trang, menu, ảnh - tải ảnh từ demo)..."
+  wp_run "$id" import /tmp/demo-content.xml --authors=create >/dev/null 2>&1 \
+    || warn "Import có cảnh báo - kiểm tra wp-admin > Tools > Import."
+  docker exec "${id}_php" rm -f /tmp/demo-content.xml >/dev/null 2>&1 || true
+  # Đổi URL demo -> domain mới (ảnh đã remap; còn link nội bộ giữa bài/trang).
+  local demo_host; demo_host="$(grep -oE '<wp:base_blog_url>[^<]+' "$wxr" | head -1 | sed -E 's#.*//##; s#/.*##')"
+  [ -n "$demo_host" ] && wp_run "$id" search-replace "$demo_host" "$new_domain" --all-tables --skip-columns=guid >/dev/null 2>&1 || true
+  # Gán vị trí menu theo slug (giống demo: primary + footer-policy).
+  wp_run "$id" menu location assign primary-navigation primary >/dev/null 2>&1 || true
+  wp_run "$id" menu location assign footer-policy-links footer-policy >/dev/null 2>&1 || true
+  # Trang chủ = bài mới nhất (giống demo).
+  wp_run "$id" option update show_on_front posts >/dev/null 2>&1 || true
+  wp_run "$id" eval 'wp_cache_flush();' >/dev/null 2>&1 || true
+  ok "Đã import nội dung demo."
+}
+
 # Host đã bootstrap chưa? (docker + network + wp-cli).
 host_ready() {
   need_cmd docker && docker network inspect "$PROXY_NET" >/dev/null 2>&1 \

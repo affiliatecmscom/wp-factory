@@ -197,6 +197,12 @@ act_site_add() {
     else
       warn "Chưa có license - activate sau trong wp-admin."
     fi
+    # Nội dung mẫu giống demo (mặc định Có). Cần internet để tải ảnh từ demo.
+    if ui_yesno "Import nội dung mẫu giống demo (22 bài, 6 trang, menu, ảnh)?" yes; then
+      acms_import_demo_content "$id" "$domain"
+    else
+      info "Bỏ qua nội dung demo - site bắt đầu trống."
+    fi
   fi
 
   # quyền để cài/sửa/xoá plugin+theme + upload media từ wp-admin (không đòi FTP)
