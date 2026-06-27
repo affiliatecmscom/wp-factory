@@ -281,33 +281,65 @@ acms_import_config() {
   docker exec "${id}_php" rm -f /tmp/acms-config.json >/dev/null 2>&1 || true
 }
 
-# Import NỘI DUNG demo (bài/trang/danh mục/menu/ảnh) từ file WXR bundle -> giống hệt demo.
-# Ảnh: WordPress Importer tự tải từ URL demo (public) + remap về site mới. Cần internet.
+# Tải BUNDLE nội dung demo (DB+uploads đã sanitize) từ app.lat.vn, gated theo license.
+# Trả về đường dẫn thư mục đã giải nén (chứa database.sql + uploads/ + bundle.info) qua stdout.
+fetch_demo_bundle() {
+  local key="$1" outdir="$2"
+  [ -n "$key" ] || { warn "Cần license để tải bundle demo."; return 1; }
+  ensure_unzip >/dev/null 2>&1 || true
+  local tmp; tmp="$(mktemp -d)"
+  if ! curl -fsS --max-time 300 -o "${tmp}/demo-bundle.tar.gz" \
+      "${LICENSE_SERVER}/update/demo/download?license_key=${key}"; then
+    warn "Tải bundle demo thất bại (license còn hạn? server có bundle chưa?)."; rm -rf "$tmp"; return 1
+  fi
+  mkdir -p "$outdir"
+  tar -xzf "${tmp}/demo-bundle.tar.gz" -C "$outdir" 2>/dev/null || { warn "Giải nén bundle demo lỗi."; rm -rf "$tmp" "$outdir"; return 1; }
+  rm -rf "$tmp"
+  [ -f "${outdir}/database.sql" ] || { warn "Bundle thiếu database.sql."; return 1; }
+  return 0
+}
+
+# Import NỘI DUNG + CẤU HÌNH demo bằng FULL CLONE (DB + uploads) -> giống hệt demo:
+# sản phẩm/từ khóa (bảng acms), logo/sidebar/widget (theme_mods), bài/trang/menu/ảnh.
+# Nạp database.sql (đã sanitize secret) đè DB site, copy uploads, tạo lại admin (dump bỏ users),
+# đổi URL demo -> canon_host. Cần license (gated tải bundle).
 acms_import_demo_content() {
-  local id="$1" new_domain="$2" wxr="${WPF_ROOT}/assets/demo-content.xml"
-  [ -f "$wxr" ] || { warn "Không có assets/demo-content.xml - bỏ qua."; return 1; }
-  info "Cài WordPress Importer..."
-  wp_run "$id" plugin install wordpress-importer --activate >/dev/null 2>&1 \
-    || { warn "Cài wordpress-importer lỗi (kiểm mạng) - bỏ qua import demo."; return 1; }
-  docker cp "$wxr" "${id}_php:/tmp/demo-content.xml" >/dev/null 2>&1 \
-    || { warn "Copy WXR vào container lỗi."; return 1; }
-  info "Import nội dung demo (bài, trang, menu, ảnh - tải ảnh từ demo)..."
-  wp_run "$id" import /tmp/demo-content.xml --authors=create >/dev/null 2>&1 \
-    || warn "Import có cảnh báo - kiểm tra wp-admin > Tools > Import."
-  docker exec "${id}_php" rm -f /tmp/demo-content.xml >/dev/null 2>&1 || true
-  # Đổi URL demo -> domain mới (ảnh đã remap; còn link nội bộ giữa bài/trang).
-  local demo_host; demo_host="$(grep -oE '<wp:base_blog_url>[^<]+' "$wxr" | head -1 | sed -E 's#.*//##; s#/.*##')"
-  [ -n "$demo_host" ] && wp_run "$id" search-replace "$demo_host" "$new_domain" --all-tables --skip-columns=guid >/dev/null 2>&1 || true
-  # Gán vị trí menu theo slug (giống demo: primary + footer-policy).
-  wp_run "$id" menu location assign primary-navigation primary >/dev/null 2>&1 || true
-  wp_run "$id" menu location assign footer-policy-links footer-policy >/dev/null 2>&1 || true
-  # Trang chủ = bài mới nhất (giống demo).
-  wp_run "$id" option update show_on_front posts >/dev/null 2>&1 || true
-  wp_run "$id" eval 'wp_cache_flush();' >/dev/null 2>&1 || true
-  # Gỡ WordPress Importer (chỉ cần lúc import xong là thừa).
-  wp_run "$id" plugin deactivate wordpress-importer >/dev/null 2>&1 || true
-  wp_run "$id" plugin delete wordpress-importer >/dev/null 2>&1 || true
-  ok "Đã import nội dung demo."
+  local id="$1" canon_host="$2" admin_user="$3" admin_pass="$4" admin_email="$5" license="$6"
+  [ -n "$license" ] || { warn "Chưa có license - bỏ qua nội dung demo (gated)."; return 1; }
+  local dir; dir="$(site_dir "$id")"
+  local db_pass; db_pass="$(grep -E '^DB_PASSWORD=' "${dir}/.env" | head -1 | cut -d= -f2-)"
+  [ -n "$db_pass" ] || { warn "Không đọc được DB_PASSWORD site."; return 1; }
+
+  local ex; ex="$(mktemp -d)"
+  info "Tải bundle nội dung demo từ app.lat.vn..."
+  fetch_demo_bundle "$license" "$ex" || { rm -rf "$ex"; return 1; }
+
+  info "Nạp database demo (đè) ..."
+  if ! docker exec -i "${id}_db" mariadb -uwordpress -p"$db_pass" wordpress < "${ex}/database.sql"; then
+    warn "Nạp database demo lỗi."; rm -rf "$ex"; return 1
+  fi
+  if [ -d "${ex}/uploads" ]; then
+    info "Copy uploads demo..."
+    mkdir -p "${dir}/wp-content/uploads"
+    rsync -a "${ex}/uploads/" "${dir}/wp-content/uploads/" 2>/dev/null || cp -a "${ex}/uploads/." "${dir}/wp-content/uploads/" 2>/dev/null || true
+  fi
+  local demo_host; demo_host="$(grep -E '^demo_host=' "${ex}/bundle.info" 2>/dev/null | cut -d= -f2-)"
+  [ -n "$demo_host" ] || demo_host="iflmmo.affiliatecms.com"
+  rm -rf "$ex"
+
+  # Dump đã bỏ data wp_users -> tạo lại admin (sẽ là ID 1 vì bảng rỗng -> giữ quyền tác giả bài demo).
+  info "Tạo tài khoản admin..."
+  wp_run "$id" user create "$admin_user" "$admin_email" --role=administrator --user_pass="$admin_pass" >/dev/null 2>&1 \
+    || wp_run "$id" user update 1 --user_pass="$admin_pass" --user_email="$admin_email" >/dev/null 2>&1 \
+    || warn "Tạo admin sau clone lỗi - kiểm tra wp-admin."
+
+  info "Đổi URL demo -> ${canon_host} ..."
+  wp_run "$id" search-replace "$demo_host" "$canon_host" --all-tables --skip-columns=guid >/dev/null 2>&1 || true
+  wp_run "$id" option update home "https://${canon_host}" >/dev/null 2>&1 || true
+  wp_run "$id" option update siteurl "https://${canon_host}" >/dev/null 2>&1 || true
+  wp_run "$id" option update blog_public 0 >/dev/null 2>&1 || true
+  wp_run "$id" cache flush >/dev/null 2>&1 || true
+  ok "Đã clone nội dung + cấu hình demo (sản phẩm, từ khóa, logo, sidebar, bài, ảnh)."
 }
 
 # Host đã bootstrap chưa? (docker + network + wp-cli).

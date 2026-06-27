@@ -182,11 +182,22 @@ act_site_add() {
   wp_run "$id" plugin delete hello >/dev/null 2>&1 || true
 
   if [ "$type" = "affiliatecms" ]; then
-    # Plugin PHỤ THUỘC (giống demo iflmmo): Rank Math (AffiliateCMS tích hợp SEO/schema sâu) +
-    # Classic Editor. Tải từ wordpress.org qua wp-cli - KHÔNG có sẽ thiếu SEO/schema.
+    # Plugin PHỤ THUỘC (giống demo): Rank Math + Classic Editor. Cần FILE sẵn cho cả fresh lẫn clone
+    # (dump demo đánh dấu chúng active -> thiếu file sẽ bị WP tự deactivate).
     info "Cài plugin phụ thuộc (Rank Math SEO + Classic Editor)..."
-    wp_run "$id" plugin install seo-by-rank-math classic-editor --activate >/dev/null 2>&1 \
-      || warn "Cài Rank Math/Classic Editor lỗi (kiểm mạng) - vào wp-admin cài tay: seo-by-rank-math, classic-editor."
+    wp_run "$id" plugin install seo-by-rank-math classic-editor >/dev/null 2>&1 \
+      || warn "Cài Rank Math/Classic Editor lỗi (kiểm mạng) - vào wp-admin cài tay."
+
+    # Nội dung + CẤU HÌNH giống demo (FULL CLONE, mặc định Có): sản phẩm, từ khóa, logo, sidebar,
+    # widget, bài, trang, menu, ảnh. Đè DB site bằng bản demo (đã sanitize secret). Cần license.
+    if [ -n "$license" ] && ui_yesno "Import nội dung + cấu hình giống demo (sản phẩm, từ khóa, logo, sidebar, bài, ảnh)?" yes; then
+      acms_import_demo_content "$id" "$canon_host" "$admin_user" "$admin_pass" "$email" "$license" \
+        || warn "Clone demo lỗi - site dùng cấu hình mặc định."
+    else
+      info "Bỏ qua clone demo - site bắt đầu với cấu hình mặc định."
+    fi
+
+    # Kích hoạt theme CON + plugin (đảm bảo đúng trạng thái dù fresh hay sau clone).
     info "Kích hoạt theme CON (giống demo) + plugin AffiliateCMS..."
     wp_run "$id" theme activate affiliateCMS-Child >/dev/null 2>&1 \
       || wp_run "$id" theme activate affiliateCMS-theme >/dev/null 2>&1 \
@@ -197,21 +208,19 @@ act_site_add() {
       [ "$_t" = "affiliateCMS-theme" ] && continue
       wp_run "$id" theme delete "$_t" >/dev/null 2>&1 || true
     done
-    wp_run "$id" plugin activate affiliatecms-pro affiliatecms-ai >/dev/null 2>&1 || warn "Chưa activate được plugin."
-    # Import config giống demo (Rank Math + settings + templates), đã strip license/API/affiliate_tag.
-    info "Import cấu hình giống demo..."
+    wp_run "$id" plugin activate affiliatecms-pro affiliatecms-ai seo-by-rank-math classic-editor >/dev/null 2>&1 \
+      || warn "Chưa activate được plugin."
+
+    # Cấu hình AffiliateCMS sanitized (general_settings sạch affiliate_tag, rank math) - đè lên clone.
+    info "Áp cấu hình AffiliateCMS (đã strip secret)..."
     acms_import_config "$id"
+
+    # License (đặt SAU clone vì clone đã xoá option license của demo).
     if [ -n "$license" ]; then
       wp_run "$id" option update acms_license_key "$license" >/dev/null 2>&1 || true
       license_activate "$license" "$domain" && ok "License đã activate." || warn "Activate license thất bại - xử lý sau trong wp-admin."
     else
       warn "Chưa có license - activate sau trong wp-admin."
-    fi
-    # Nội dung mẫu giống demo (mặc định Có). Cần internet để tải ảnh từ demo.
-    if ui_yesno "Import nội dung mẫu giống demo (22 bài, 6 trang, menu, ảnh)?" yes; then
-      acms_import_demo_content "$id" "$canon_host"
-    else
-      info "Bỏ qua nội dung demo - site bắt đầu trống."
     fi
   fi
 
