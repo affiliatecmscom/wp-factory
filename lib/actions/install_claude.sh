@@ -53,6 +53,18 @@ _claude_apikey() {
   fi
 }
 
+# Đổi tài khoản Claude: ĐĂNG XUẤT tài khoản hiện tại (xoá token + danh tính) nhưng GIỮ binary.
+# Học viên chỉ cần gõ 'claude' để đăng nhập tài khoản MỚI - không phải gỡ rồi cài lại.
+_claude_switch_account() {
+  require_root
+  ui_yesno "ĐỔI TÀI KHOẢN sẽ ĐĂNG XUẤT tài khoản Claude đang dùng trên VPS này.\nSau đó bạn phải gõ 'claude' và đăng nhập bằng tài khoản MỚI. Tiếp tục?" || return 0
+  # Token đăng nhập (buộc login lại) + file danh tính tài khoản cũ. KHÔNG đụng binary/PATH.
+  rm -f /root/.claude/.credentials.json 2>/dev/null || true
+  rm -f /root/.claude.json /root/.claude.json.backup 2>/dev/null || true
+  ok "Đã đăng xuất tài khoản cũ (Claude Code vẫn còn cài)."
+  _claude_login_help
+}
+
 # Gỡ Claude Code: binary + đăng nhập. Giữ dòng PATH .local/bin (tool khác có thể dùng).
 _claude_uninstall() {
   require_root
@@ -67,7 +79,10 @@ _claude_uninstall() {
   sed -i '\#claude-env#d' "$CLAUDE_BASHRC" 2>/dev/null || true
   if ui_yesno "Xoá luôn đăng nhập + cấu hình của Claude (~/.claude, ~/.config/claude)?"; then
     rm -rf /root/.claude /root/.config/claude 2>/dev/null || true
-    ok "Đã xoá cả đăng nhập/cấu hình."
+    # ~/.claude.json nằm NGOÀI thư mục ~/.claude nhưng chứa danh tính tài khoản
+    # (oauthAccount/emailAddress/accountUuid) -> phải xoá để "gỡ hết" thật sự sạch.
+    rm -f /root/.claude.json /root/.claude.json.backup 2>/dev/null || true
+    ok "Đã xoá cả đăng nhập/cấu hình/danh tính tài khoản."
   fi
   ui_msg "Đã gỡ Claude Code."
 }
@@ -83,6 +98,7 @@ act_install_claude() {
     c="$(ui_menu "Claude Code đã cài (${ver:-?}). Làm gì?" \
       login     "Hướng dẫn đăng nhập tài khoản (gõ claude)" \
       apikey    "Dùng API key sk-ant-... thay tài khoản (tuỳ chọn)" \
+      switch    "Đổi tài khoản Claude (đăng xuất tài khoản hiện tại)" \
       update    "Cập nhật (claude update)" \
       reinstall "Cài lại" \
       uninstall "Gỡ cài đặt Claude Code" \
@@ -90,6 +106,7 @@ act_install_claude() {
     case "$c" in
       login)     _claude_login_help; return 0;;
       apikey)    _claude_apikey; return 0;;
+      switch)    _claude_switch_account; return 0;;
       update)    "$CLAUDE_BIN" update 2>&1 | tail -5 || true; ui_msg "Đã chạy cập nhật Claude Code."; return 0;;
       reinstall) ;;  # rơi xuống phần cài
       uninstall) _claude_uninstall; return 0;;
